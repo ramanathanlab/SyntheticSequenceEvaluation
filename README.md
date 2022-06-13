@@ -1,5 +1,5 @@
-# SummerStudentTemplate
-TODO: Update with a brief project description and repository name
+# SyntheticSequenceEvaluation
+Pipeline to evaluate synthetic sequences. 
 
 # Installation & Setup
 TODO: Update with a description of which commands you use to setup your software, including any installation steps.
