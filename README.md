@@ -16,6 +16,7 @@ conda install matplotlib
 conda uninstall pytorch
 pip uninstall torch
 pip install torch --no-cache-dir
+pip install plotly==5.8.2
 
 ```
 
