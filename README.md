@@ -2,10 +2,6 @@
 Pipeline to evaluate synthetic sequences. 
 
 # Installation & Setup
-TODO: Update with a description of which commands you use to setup your software, including any installation steps.
-
-You can use example code blocks like these:
-
 In the base environment of the lambda server, run the following commands:
 ```
 conda create -n mdhpipeline -c rapidsai -c nvidia -c conda-forge  \
