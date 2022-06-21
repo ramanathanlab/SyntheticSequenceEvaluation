@@ -5,9 +5,16 @@ Pipeline to evaluate synthetic sequences.
 TODO: Update with a description of which commands you use to setup your software, including any installation steps.
 
 You can use example code blocks like these:
+
+In the base environment of the lambda server, run the following commands:
 ```
-conda create -n myenv python=3.9
-conda activate myenv
+conda create -n mdhpipeline -c rapidsai -c nvidia -c conda-forge  \
+    cuml=22.04 python=3.9 cudatoolkit=11.2 \
+    jupyterlab pytorch
+conda activate mdhpipeline
+export IBM_POWERAI_LICENSE_ACCEPT=yes
+pip install -U scikit-learn
+pip install mdlearn
 ```
 
 # Running the code
