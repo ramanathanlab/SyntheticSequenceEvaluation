@@ -11,6 +11,12 @@ conda activate mdhpipeline
 export IBM_POWERAI_LICENSE_ACCEPT=yes
 pip install -U scikit-learn
 pip install mdlearn
+
+conda install matplotlib
+conda uninstall pytorch
+pip uninstall torch
+pip install torch --no-cache-dir
+
 ```
 
 # Running the code
