@@ -1,2 +1,2 @@
 # Notebooks
-Put any jupyter notebooks here
+Jupyter notebooks used to run the analysis. 
