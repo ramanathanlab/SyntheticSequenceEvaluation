@@ -20,11 +20,18 @@ pip install plotly==5.8.2
 
 ```
 # Running Alphafold
-First log in to Lambda. Then add the following to .bashrc:
+First log in to Lambda. Then add the following to .bashrc by: 
+```
+vim ~/.bashrc
+i
+```
+
 ```
 alias alphafold_container='/software/singularity/bin/singularity exec --nv -B /lambda_stor/ /lambda_stor/data/hsyoo/AlphaFoldImage/alphafold.sif bash'
 alias alphafold_env='source /opt/miniconda3/etc/profile.d/conda.sh; conda activate alphafold'
 ```
+Press ESC and then type ```:wq!``` then press Enter to save the changes and exit vim.
+
 Then run ```source .bashrc``` or re-login. 
 Then run: 
 ```
