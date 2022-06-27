@@ -32,7 +32,7 @@ alias alphafold_env='source /opt/miniconda3/etc/profile.d/conda.sh; conda activa
 ```
 Press ESC and then type ```:wq!``` then press Enter to save the changes and exit vim.
 
-Then run ```source .bashrc``` or re-login. 
+Then run ```source ~/.bashrc``` or re-login. 
 Then run: 
 ```
 alphafold_container
