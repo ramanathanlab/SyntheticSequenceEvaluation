@@ -37,7 +37,24 @@ Then run:
 ```
 /software/singularity/bin/singularity exec --nv -B /lambda_stor/ -B /software /lambda_stor/data/hsyoo/AlphaFoldImage/alphafold.sif bash
 alphafold_env
+mkdir examplerun
+cd examplerun
+vim test_seq.fasta # this is where you paste in the protein sequence whose 3D structure you would like AlphaFold to predict. 
+./run.sh -d /lambda_stor/data/hsyoo/AlphaFoldData  -o test_out -f test_seq.fasta \
+ -t 2020-05-01 -p casp14 -m model_1,model_2,model_3,model_4,model_5 \
+-a 0
 ```
+In the last command, ```-a``` indicates the GPU to use. In this case, we are using the 0th GPU. 
+
+Now, AlphaFold should start to run. This may take an hour. 
+
+After AlphaFold finishes running, run the following to specify where you would like to store the AlphaFold results. 
+```
+scp -r username@lambda:/homes/lind/examplerun/ local/directory/path
+```
+For example, this might be ```scp -r lind@lambda.cels.anl.gov:/homes/lind/examplerun/* ~/Documents/mdh_results``` for me. 
+
+
 
 
 # Running the code
