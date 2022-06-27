@@ -35,7 +35,7 @@ Press ESC and then type ```:wq!``` then press Enter to save the changes and exit
 Then run ```source ~/.bashrc``` or re-login. 
 Then run: 
 ```
-alphafold_container
+/software/singularity/bin/singularity exec --nv -B /lambda_stor/ -B /software /lambda_stor/data/hsyoo/AlphaFoldImage/alphafold.sif bash
 alphafold_env
 ```
 
