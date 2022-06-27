@@ -21,16 +21,16 @@ pip install plotly==5.8.2
 ```
 # Running Alphafold
 First log in to Lambda. Then add the following to .bashrc:
-'''
+```
 alias alphafold_container='/software/singularity/bin/singularity exec --nv -B /lambda_stor/ /lambda_stor/data/hsyoo/AlphaFoldImage/alphafold.sif bash'
 alias alphafold_env='source /opt/miniconda3/etc/profile.d/conda.sh; conda activate alphafold'
-'''
-Then run '''source .bashrc''' or re-login. 
+```
+Then run ```source .bashrc``` or re-login. 
 Then run: 
-'''
+```
 alphafold_container
 alphafold_env
-'''
+```
 
 
 # Running the code
