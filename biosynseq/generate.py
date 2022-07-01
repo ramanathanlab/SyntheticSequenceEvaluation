@@ -1,1 +1,1 @@
-# generate synthetic sequences and embeddings given model weights
+"""generate synthetic sequences and embeddings given model weights."""
