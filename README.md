@@ -54,25 +54,3 @@ scp -r username@lambda:/homes/lind/examplerun/ local/directory/path
 ```
 For example, this might be ```scp -r lind@lambda.cels.anl.gov:/homes/lind/examplerun/* ~/Documents/mdh_results``` for me. 
 
-
-
-
-# Running the code
-TODO: Update with a description of which commands you use to run your software.
-
-If your code is stored in jupyter notebooks, then specify which notebook you run here.
-
-Note: jupyter notebooks should be stored in the `notebooks` folder
-
-
-# Data
-TODO: Descirption of any data you have stored in the `data/` folder.
-
-# Notes
-TODO: Any other comments or open issues
-
-# Tips
-For extra help on the following topics, please see the links below:
-- GitHub: https://skills.github.com/
-- Linux/GitHub/ComputerScience: https://missing.csail.mit.edu/
-- Python: https://www.youtube.com/playlist?list=PLQVvvaa0QuDeAams7fkdcwOGBpGdHpXln 
