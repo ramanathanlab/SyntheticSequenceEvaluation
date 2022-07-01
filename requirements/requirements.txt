@@ -1,6 +1,4 @@
-rapidsai
 jupyterlab
-pytorch
 scikit-learn
 mdlearn
 matplotlib
