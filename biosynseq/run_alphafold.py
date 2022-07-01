@@ -1,1 +1,1 @@
-# run alphafold on select synthetic sequences
+"""Run alphafold on select synthetic sequences."""

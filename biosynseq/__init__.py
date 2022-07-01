@@ -1,3 +1,5 @@
+"""This module allows for more efficient organization and orchestration of biosynseq."""
+
 __version__ = "0.0.1a1"
 
 import logging

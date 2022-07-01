@@ -1,1 +1,1 @@
-# visualize synthetic sequences using t-SNE and UMAP
+"""Visualize synthetic sequences using t-SNE and UMAP."""
