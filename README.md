@@ -19,6 +19,15 @@ pip install torch --no-cache-dir
 pip install plotly==5.8.2
 
 ```
+
+```
+python3 -m venv env
+source env/bin/activate
+pip3 install -U pip setuptools wheel
+pip3 install -r requirements/dev.txt
+pip3 install -r requirements/requirements.txt
+pip3 install -e .
+```
 # Running Alphafold
 First log in to Lambda. Then add the following to .bashrc by: 
 ```
