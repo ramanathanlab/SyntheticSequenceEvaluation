@@ -79,8 +79,10 @@ if __name__ == "__main__":
     torch.set_num_threads(config.num_data_workers)  # type: ignore[attr-defined]
     pl.seed_everything(0)
 
+    print("1_")
     if args.mode == "get fasta":
         generate_fasta(cfg=config, pt_path=args.pt_path, fasta_path=args.fasta_path)
+        print("2_")
     if args.mode == "get embeddings":
         if not args.fasta_path:
             raise ValueError("Must provide a fasta file to run inference on.")
@@ -89,13 +91,16 @@ if __name__ == "__main__":
             raise FileExistsError(
                 f"inference_output_path: {args.embeddings_output_path} already exists!"
             )
-
+        print("3_")
         if args.embeddings_model_load == "pt":
             model_strategy = LoadPTCheckpointStrategy(config, args.pt_path)
+            print("4_")
         elif args.inference_model_load == "deepspeed":
             model_strategy = LoadDeepSpeedStrategy(config)
         else:
             raise ValueError(
                 f"Invalid embeddings_model_load {args.embeddings_model_load}"
             )
+        print("5_")
         inference(model_strategy, args.fasta_path, args.embeddings_output_path)
+        print("6_")
