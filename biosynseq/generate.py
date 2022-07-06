@@ -23,6 +23,7 @@ from argparse import ArgumentParser
 def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> dict:
     """Given pt or deepspeed file, output generated sequences' fasta files."""
     # obtain model
+    print("1")
     if Path(pt_path).suffix == ".pt":
         # load pt file weights
         model = DNATransformer.load_from_checkpoint(
@@ -35,12 +36,17 @@ def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> dict:
         model = load_from_deepspeed(
             cfg=cfg, checkpoint_dir=cfg.load_from_checkpoint_dir
         )
+    print("2")
     model.cuda()
+    print("3")
     # generate non-redundant sequences
     results = non_redundant_generation(model=model.model, tokenizer=model.tokenizer)
+    print("4")
     # turn unique sequences to fasta
     unique_seqs = list(results.get("unique_seqs"))
+    print("5")
     seqs_to_fasta(seqs=unique_seqs, file_name=fasta_path)
+    print("6")
     return results
 
 
