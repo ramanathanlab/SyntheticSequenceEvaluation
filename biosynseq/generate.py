@@ -5,6 +5,7 @@ import pytorch_lightning as pl
 import torch
 from tqdm import tqdm
 from gene_transformer.model import DNATransformer
+
 # from gene_transformer.model import get_embeddings_using_pt
 # from gene_transformer.model import LoadPTCheckpointStrategy, LoadDeepSpeedStrategy
 from gene_transformer.model import load_from_deepspeed
@@ -24,31 +25,45 @@ def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> None:
     # obtain model
     if Path(pt_path).suffix == ".pt":
         # load pt file weights
-        model = DNATransformer.load_from_checkpoint(checkpoint_path=pt_path, strict=False, cfg=cfg)
+        model = DNATransformer.load_from_checkpoint(
+            checkpoint_path=pt_path, strict=False, cfg=cfg
+        )
     else:
         # load deepspeed weights
         if cfg.load_from_checkpoint_dir is None:
             raise ValueError("load_from_checkpoint_dir must be set in the config file.")
-        model = load_from_deepspeed(cfg=cfg, checkpoint_dir=cfg.load_from_checkpoint_dir)
+        model = load_from_deepspeed(
+            cfg=cfg, checkpoint_dir=cfg.load_from_checkpoint_dir
+        )
     model.cuda()
     # generate non-redundant sequences
     results = non_redundant_generation(model=model.model, tokenizer=model.tokenizer)
     # turn unique sequences to fasta
-    unique_seqs = list(results.get('unique_seqs'))
+    unique_seqs = list(results.get("unique_seqs"))
     seqs_to_fasta(seqs=unique_seqs, file_name=fasta_path)
 
-def fasta_to_embeddings(model_strategy, fasta_path, embeddings_output_path) -> np.ndarray:
+
+def fasta_to_embeddings(
+    model_strategy, fasta_path, embeddings_output_path
+) -> np.ndarray:
     embeddings = inference(model_strategy, fasta_path, embeddings_output_path)
     return embeddings
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Generate sequences and/or embeddings.")
     parser.add_argument("-c", "--config", type=str, required=True)
-    parser.add_argument("--mode", default="get fasta", type=str, help="get fasta or get embeddings")
+    parser.add_argument(
+        "--mode", default="get_fasta", type=str, help="get_fasta or get_embeddings"
+    )
     parser.add_argument("--pt_path", type=str)
     parser.add_argument("--fasta_path", default="", type=str)
-    parser.add_argument("--embeddings_output_path", default="./embeddings.npy", type=Path)
-    parser.add_argument("--embeddings_model_load", default="pt", type=str, help="deepspeed or pt")
+    parser.add_argument(
+        "--embeddings_output_path", default="./embeddings.npy", type=Path
+    )
+    parser.add_argument(
+        "--embeddings_model_load", default="pt", type=str, help="deepspeed or pt"
+    )
     args = parser.parse_args()
     config = ModelSettings.from_yaml(args.config)
 
@@ -77,12 +92,3 @@ if __name__ == "__main__":
                 f"Invalid embeddings_model_load {args.embeddings_model_load}"
             )
         inference(model_strategy, args.fasta_path, args.embeddings_output_path)
-
-
-
-
-
-
-
-
-
