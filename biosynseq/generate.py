@@ -80,10 +80,10 @@ if __name__ == "__main__":
     pl.seed_everything(0)
 
     print("1_")
-    if args.mode == "get fasta":
+    if args.mode == "get_fasta":
         generate_fasta(cfg=config, pt_path=args.pt_path, fasta_path=args.fasta_path)
         print("2_")
-    if args.mode == "get embeddings":
+    if args.mode == "get_embeddings":
         if not args.fasta_path:
             raise ValueError("Must provide a fasta file to run inference on.")
 
