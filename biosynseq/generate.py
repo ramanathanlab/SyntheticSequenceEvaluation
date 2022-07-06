@@ -20,7 +20,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 
 
-def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> None:
+def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> dict:
     """Given pt or deepspeed file, output generated sequences' fasta files."""
     # obtain model
     if Path(pt_path).suffix == ".pt":
@@ -41,6 +41,7 @@ def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> None:
     # turn unique sequences to fasta
     unique_seqs = list(results.get("unique_seqs"))
     seqs_to_fasta(seqs=unique_seqs, file_name=fasta_path)
+    return results
 
 
 def fasta_to_embeddings(
