@@ -78,8 +78,6 @@ if __name__ == "__main__":
             )
         inference(model_strategy, args.fasta_path, args.embeddings_output_path)
 
-exit()
-
 
 
 
