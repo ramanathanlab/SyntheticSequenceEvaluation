@@ -7,7 +7,7 @@ from tqdm import tqdm
 from gene_transformer.model import DNATransformer
 
 # from gene_transformer.model import get_embeddings_using_pt
-# from gene_transformer.model import LoadPTCheckpointStrategy, LoadDeepSpeedStrategy
+from gene_transformer.model import LoadPTCheckpointStrategy, LoadDeepSpeedStrategy
 from gene_transformer.model import load_from_deepspeed
 from gene_transformer.model import inference
 from gene_transformer.config import ModelSettings
