@@ -58,14 +58,6 @@ For example, this might be ```scp -r lind@lambda.cels.anl.gov:/homes/lind/exampl
 
 
 # Running the code
-## How to run generate.py
-Example 1: running generate_fasta
-```
-python3 generate.py --mode get_fasta --config /homes/lind/MDH-pipeline/mdh_gpt.yaml --pt_path /homes/mzvyagin/gpt2_mdh_example/gpt2_earnest_river_122_mdh.pt --fasta_path /homes/lind/MDH-pipeline/fasta/fasta_test2.fasta
-```
-Example 2: running fasta_to_embeddings
-
-
 TODO: Update with a description of which commands you use to run your software.
 
 If your code is stored in jupyter notebooks, then specify which notebook you run here.
