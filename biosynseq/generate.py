@@ -53,7 +53,9 @@ def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> dict:
 def fasta_to_embeddings(
     model_strategy, fasta_path, embeddings_output_path
 ) -> np.ndarray:
+    print("_1")
     embeddings = inference(model_strategy, fasta_path, embeddings_output_path)
+    print("_2")
     return embeddings
 
 
@@ -89,7 +91,7 @@ if __name__ == "__main__":
 
         if args.embeddings_output_path.exists():
             raise FileExistsError(
-                f"inference_output_path: {args.embeddings_output_path} already exists!"
+                f"embeddings_output_path: {args.embeddings_output_path} already exists!"
             )
         print("3_")
         if args.embeddings_model_load == "pt":
@@ -102,5 +104,7 @@ if __name__ == "__main__":
                 f"Invalid embeddings_model_load {args.embeddings_model_load}"
             )
         print("5_")
-        inference(model_strategy, args.fasta_path, args.embeddings_output_path)
+        fasta_to_embeddings(
+            model_strategy, args.fasta_path, args.embeddings_output_path
+        )
         print("6_")
