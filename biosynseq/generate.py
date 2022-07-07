@@ -7,6 +7,7 @@ import torch
 from tqdm import tqdm
 
 from gene_transformer.model import DNATransformer
+from gene_transformer.model import ModelLoadStrategy
 from gene_transformer.model import LoadPTCheckpointStrategy, LoadDeepSpeedStrategy
 from gene_transformer.model import load_from_deepspeed
 from gene_transformer.model import inference
@@ -47,7 +48,7 @@ def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> dict:
 
 
 def fasta_to_embeddings(
-    model_strategy, fasta_path, embeddings_output_path
+    model_strategy: ModelLoadStrategy, fasta_path: str, embeddings_output_path: str
 ) -> np.ndarray:
     embeddings = inference(model_strategy, fasta_path, embeddings_output_path)
     return embeddings
