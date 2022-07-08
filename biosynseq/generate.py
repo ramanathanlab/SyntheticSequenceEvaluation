@@ -7,20 +7,21 @@ from pathlib import Path
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from Bio.Seq import Seq
+
+# from Bio.Seq import Seq
 from gene_transformer.config import ModelSettings
-from gene_transformer.dataset import FASTADataset
-from gene_transformer.model import (
-    DNATransformer,
+
+# from gene_transformer.dataset import FASTADataset
+from gene_transformer.model import (  # DNATransformer,; load_from_deepspeed,
     LoadDeepSpeedStrategy,
     LoadPTCheckpointStrategy,
     ModelLoadStrategy,
     inference,
-    load_from_deepspeed,
 )
 from gene_transformer.utils import non_redundant_generation, seqs_to_fasta
-from torch.utils.data import DataLoader
-from tqdm import tqdm
+
+# from torch.utils.data import DataLoader
+# from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
