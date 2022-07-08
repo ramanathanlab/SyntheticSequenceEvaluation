@@ -29,7 +29,7 @@ def generate_fasta(
     ----------
     model_strategy : ModelLoadStrategy
         Model used to generate sequences, depending on whether a pt file or a deepspeed directory is given.
-    fasta_path : strs
+    fasta_path : str
         Path to save fasta sequences.
     num_seqs : int
         Number of non-redundant sequences to generate.
