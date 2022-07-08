@@ -9,5 +9,3 @@ import pandas as pd
 from Bio import SeqIO, SeqRecord, SeqUtils
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 from mdlearn.utils import plot_scatter
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
