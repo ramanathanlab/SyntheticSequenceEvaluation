@@ -3,6 +3,7 @@ import logging
 import os
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Dict, List
 
 import numpy as np
 import pytorch_lightning as pl
@@ -21,8 +22,24 @@ logger = logging.getLogger(__name__)
 
 def generate_fasta(
     model_strategy: ModelLoadStrategy, fasta_path: str, num_seqs: int
-) -> dict:
-    """Given pt or deepspeed file, output generated sequences' fasta files."""
+) -> Dict[str, List[str]]:
+    """Given pt file or deepspeed directory, output generated sequences' fasta file.
+
+    Parameters
+    ----------
+    model_strategy : ModelLoadStrategy
+        Model used to generate sequences, depending on whether a pt file or a deepspeed directory is given.
+    fasta_path : strs
+        Path to save fasta sequences.
+    num_seqs : int
+        Number of non-redundant sequences to generate.
+
+    Returns
+    -------
+    Dict[str, List[str]]
+        Unique generated sequences.
+    """
+
     # obtain model
     model = model_strategy.get_model()
     model.cuda()
@@ -30,8 +47,9 @@ def generate_fasta(
     results = non_redundant_generation(
         model=model.model, tokenizer=model.tokenizer, num_seqs=num_seqs
     )
+    results["unique_seqs"] = list(results["unique_seqs"])
     # turn unique sequences to fasta
-    unique_seqs = list(results.get("unique_seqs"))
+    unique_seqs = results.get("unique_seqs")
     seqs_to_fasta(seqs=unique_seqs, file_name=fasta_path)
     return results
 
@@ -39,6 +57,23 @@ def generate_fasta(
 def fasta_to_embeddings(
     model_strategy: ModelLoadStrategy, fasta_path: str, embeddings_output_path: str
 ) -> np.ndarray:
+    """Run inference to generate embeddings for generated sequences.
+
+    Parameters
+    ----------
+    model_strategy : ModelLoadStrategy
+        Model used to generate sequences, depending on whether a pt file or deepspeed is given.
+    fasta_path : str
+        Path to access fasta sequences.
+    embeddings_output_path : str
+        Path to save generated embeddings.
+
+    Returns
+    -------
+    np.ndarray
+        Generated embeddings.
+    """
+
     # run inference
     embeddings = inference(model_strategy, fasta_path, embeddings_output_path)
     return embeddings
@@ -92,9 +127,6 @@ if __name__ == "__main__":
     torch.set_num_threads(config.num_data_workers)  # type: ignore[attr-defined]
     pl.seed_everything(0)
 
-    # get number of non-redundant sequences to generate
-    num_seqs = args.num_seqs
-
     # get model_strategy
     if args.embeddings_model_load == "pt":
         model_strategy = LoadPTCheckpointStrategy(config, args.pt_path)
@@ -106,7 +138,9 @@ if __name__ == "__main__":
     # run corresponding function
     if args.mode == "get_fasta":
         generate_fasta(
-            model_strategy=model_strategy, fasta_path=args.fasta_path, num_seqs=num_seqs
+            model_strategy=model_strategy,
+            fasta_path=args.fasta_path,
+            num_seqs=args.num_seqs,
         )
     elif args.mode == "get_embeddings":
         if not args.fasta_path:
@@ -120,3 +154,5 @@ if __name__ == "__main__":
             fasta_path=args.fasta_path,
             embeddings_output_path=args.embeddings_output_path,
         )
+    else:
+        raise ValueError(f"Invalid mode: {args.mode}")
