@@ -19,13 +19,17 @@ from gene_transformer.utils import non_redundant_generation, seqs_to_fasta
 logger = logging.getLogger(__name__)
 
 
-def generate_fasta(model_strategy: ModelLoadStrategy, fasta_path: str) -> dict:
+def generate_fasta(
+    model_strategy: ModelLoadStrategy, fasta_path: str, num_seqs: int
+) -> dict:
     """Given pt or deepspeed file, output generated sequences' fasta files."""
     # obtain model
     model = model_strategy.get_model()
     model.cuda()
     # generate non-redundant sequences
-    results = non_redundant_generation(model=model.model, tokenizer=model.tokenizer)
+    results = non_redundant_generation(
+        model=model.model, tokenizer=model.tokenizer, num_seqs=num_seqs
+    )
     # turn unique sequences to fasta
     unique_seqs = list(results.get("unique_seqs"))
     seqs_to_fasta(seqs=unique_seqs, file_name=fasta_path)
@@ -41,8 +45,14 @@ def fasta_to_embeddings(
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Generate sequences and/or embeddings.")
-    parser.add_argument("-c", "--config", type=str, required=True)
+    parser = ArgumentParser(description="Generate sequences or embeddings.")
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        required=True,
+        help=".yaml file containing configuration settings",
+    )
     parser.add_argument(
         "--mode",
         default="get_fasta",
@@ -50,13 +60,29 @@ if __name__ == "__main__":
         required=True,
         help="get_fasta or get_embeddings",
     )
-    parser.add_argument("--pt_path", type=str, required=True)
-    parser.add_argument("--fasta_path", default="", type=str)
     parser.add_argument(
-        "--embeddings_output_path", default="./embeddings.npy", type=Path
+        "--pt_path", type=str, required=True, help="Path to access pt file"
+    )
+    parser.add_argument(
+        "--fasta_path",
+        default="",
+        type=str,
+        help="Path to save or access fasta sequences",
+    )
+    parser.add_argument(
+        "--embeddings_output_path",
+        default="./embeddings.npy",
+        type=Path,
+        help="Path to save generated embeddings",
     )
     parser.add_argument(
         "--embeddings_model_load", default="pt", type=str, help="deepspeed or pt"
+    )
+    parser.add_argument(
+        "--num_seqs",
+        default=5,
+        type=int,
+        help="Number of non-redundant sequences to generate",
     )
     args = parser.parse_args()
     config = ModelSettings.from_yaml(args.config)
@@ -65,6 +91,9 @@ if __name__ == "__main__":
     os.environ["TOKENIZERS_PARALLELISM"] = "true"
     torch.set_num_threads(config.num_data_workers)  # type: ignore[attr-defined]
     pl.seed_everything(0)
+
+    # get number of non-redundant sequences to generate
+    num_seqs = args.num_seqs
 
     # get model_strategy
     if args.embeddings_model_load == "pt":
@@ -76,7 +105,9 @@ if __name__ == "__main__":
 
     # run corresponding function
     if args.mode == "get_fasta":
-        generate_fasta(model_strategy=model_strategy, fasta_path=args.fasta_path)
+        generate_fasta(
+            model_strategy=model_strategy, fasta_path=args.fasta_path, num_seqs=num_seqs
+        )
     elif args.mode == "get_embeddings":
         if not args.fasta_path:
             raise ValueError("Must provide a fasta file to run inference on.")
