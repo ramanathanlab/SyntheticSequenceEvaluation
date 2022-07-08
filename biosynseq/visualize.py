@@ -1,14 +1,13 @@
 """Visualize synthetic sequences using t-SNE and UMAP."""
 import os
-import numpy as np
-import matplotlib.pyplot as plt # need to import matplotlib before pandas
-import pandas as pd
 from pathlib import Path
-from mdlearn.utils import plot_scatter
-from typing import List, Dict
+from typing import Dict, List
 
-from Bio import SeqIO, SeqUtils, SeqRecord
+import matplotlib.pyplot as plt  # need to import matplotlib before pandas
+import numpy as np
+import pandas as pd
+from Bio import SeqIO, SeqRecord, SeqUtils
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
+from mdlearn.utils import plot_scatter
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
-

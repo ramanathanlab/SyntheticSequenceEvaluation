@@ -1,43 +1,34 @@
 """Generate synthetic sequences and embeddings given model weights."""
 import logging
 import os
+from argparse import ArgumentParser
+from pathlib import Path
+
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from tqdm import tqdm
-
-from gene_transformer.model import DNATransformer
-from gene_transformer.model import ModelLoadStrategy
-from gene_transformer.model import LoadPTCheckpointStrategy, LoadDeepSpeedStrategy
-from gene_transformer.model import load_from_deepspeed
-from gene_transformer.model import inference
-from gene_transformer.config import ModelSettings
-from gene_transformer.utils import non_redundant_generation, seqs_to_fasta
-from gene_transformer.dataset import FASTADataset
-
-from torch.utils.data import DataLoader
 from Bio.Seq import Seq
-from pathlib import Path
-from argparse import ArgumentParser
+from gene_transformer.config import ModelSettings
+from gene_transformer.dataset import FASTADataset
+from gene_transformer.model import (
+    DNATransformer,
+    LoadDeepSpeedStrategy,
+    LoadPTCheckpointStrategy,
+    ModelLoadStrategy,
+    inference,
+    load_from_deepspeed,
+)
+from gene_transformer.utils import non_redundant_generation, seqs_to_fasta
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
 
-def generate_fasta(cfg: ModelSettings, pt_path: str, fasta_path: str) -> dict:
+def generate_fasta(model_strategy: ModelLoadStrategy, fasta_path: str) -> dict:
     """Given pt or deepspeed file, output generated sequences' fasta files."""
     # obtain model
-    if Path(pt_path).suffix == ".pt":
-        # load pt file weights
-        model = DNATransformer.load_from_checkpoint(
-            checkpoint_path=pt_path, strict=False, cfg=cfg
-        )
-    else:
-        # load deepspeed weights
-        if cfg.load_from_checkpoint_dir is None:
-            raise ValueError("load_from_checkpoint_dir must be set in the config file.")
-        model = load_from_deepspeed(
-            cfg=cfg, checkpoint_dir=cfg.load_from_checkpoint_dir
-        )
+    model = model_strategy.get_model()
     model.cuda()
     # generate non-redundant sequences
     results = non_redundant_generation(model=model.model, tokenizer=model.tokenizer)
@@ -80,24 +71,26 @@ if __name__ == "__main__":
     torch.set_num_threads(config.num_data_workers)  # type: ignore[attr-defined]
     pl.seed_everything(0)
 
+    # get model_strategy
+    if args.embeddings_model_load == "pt":
+        model_strategy = LoadPTCheckpointStrategy(config, args.pt_path)
+    elif args.inference_model_load == "deepspeed":
+        model_strategy = LoadDeepSpeedStrategy(config)
+    else:
+        raise ValueError(f"Invalid embeddings_model_load {args.embeddings_model_load}")
+
+    # run corresponding function
     if args.mode == "get_fasta":
-        generate_fasta(cfg=config, pt_path=args.pt_path, fasta_path=args.fasta_path)
-    if args.mode == "get_embeddings":
+        generate_fasta(model_strategy=model_strategy, fasta_path=args.fasta_path)
+    elif args.mode == "get_embeddings":
         if not args.fasta_path:
             raise ValueError("Must provide a fasta file to run inference on.")
-
         if args.embeddings_output_path.exists():
             raise FileExistsError(
                 f"embeddings_output_path: {args.embeddings_output_path} already exists!"
             )
-        if args.embeddings_model_load == "pt":
-            model_strategy = LoadPTCheckpointStrategy(config, args.pt_path)
-        elif args.inference_model_load == "deepspeed":
-            model_strategy = LoadDeepSpeedStrategy(config)
-        else:
-            raise ValueError(
-                f"Invalid embeddings_model_load {args.embeddings_model_load}"
-            )
         fasta_to_embeddings(
-            model_strategy, args.fasta_path, args.embeddings_output_path
+            model_strategy=model_strategy,
+            fasta_path=args.fasta_path,
+            embeddings_output_path=args.embeddings_output_path,
         )
