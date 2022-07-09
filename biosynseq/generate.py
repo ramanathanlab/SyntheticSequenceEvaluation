@@ -127,23 +127,23 @@ def parse_args() -> Namespace:
 
 
 def main():
-    """_summary_
+    """Run generate_fasta or fasta_to_embeddings to generate fasta or embeddings based on parsed arguments.
 
     Parameters
     ----------
     args : Namespace
-        _description_
+        Parsed arguments.
 
     Raises
     ------
     ValueError
-        _description_
+        If embeddings_model_load is not either "pt" or "deepspeed."
     ValueError
-        _description_
+        If fasta_path is not provided to generate embeddings.
     FileExistsError
-        _description_
+        If embeddings_output_path leads to a file that already exists.
     ValueError
-        _description_
+        If mode is not either "get_fasta" or "get_embeddings."
     """
     config = ModelSettings.from_yaml(args.config)
 
