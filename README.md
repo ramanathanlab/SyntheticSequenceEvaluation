@@ -2,6 +2,8 @@
 Pipeline to evaluate synthetic sequences. 
 
 # Installation & Setup
+
+### Conda setup
 In the base environment of the lambda server, run the following commands:
 ```
 conda create -n mdhpipeline -c rapidsai -c nvidia -c conda-forge  \
@@ -20,6 +22,7 @@ pip install plotly==5.8.2
 
 ```
 
+### PyPI setup
 ```
 python3 -m venv env
 source env/bin/activate
@@ -27,6 +30,8 @@ pip3 install -U pip setuptools wheel
 pip3 install -r requirements/dev.txt
 pip3 install -r requirements/requirements.txt
 pip3 install -e .
+pip3 install torch
+pip3 install pytorch-lightning
 ```
 # Running Alphafold
 First log in to Lambda. Then add the following to .bashrc by: 

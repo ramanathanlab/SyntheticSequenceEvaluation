@@ -1,7 +1,7 @@
 """Generate synthetic sequences and embeddings given model weights."""
 import logging
 import os
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Dict, List
 
@@ -21,15 +21,16 @@ logger = logging.getLogger(__name__)
 
 
 def generate_fasta(
-    model_strategy: ModelLoadStrategy, fasta_path: str, num_seqs: int
+    model_strategy: ModelLoadStrategy, fasta_path: Path, num_seqs: int
 ) -> Dict[str, List[str]]:
     """Given pt file or deepspeed directory, output generated sequences' fasta file.
 
     Parameters
     ----------
     model_strategy : ModelLoadStrategy
-        Model used to generate sequences, depending on whether a pt file or a deepspeed directory is given.
-    fasta_path : str
+        Model used to generate sequences, depending on whether a pt file
+        or a deepspeed directory is given.
+    fasta_path : Path
         Path to save fasta sequences.
     num_seqs : int
         Number of non-redundant sequences to generate.
@@ -39,7 +40,6 @@ def generate_fasta(
     Dict[str, List[str]]
         Unique generated sequences.
     """
-
     # obtain model
     model = model_strategy.get_model()
     model.cuda()
@@ -49,13 +49,12 @@ def generate_fasta(
     )
     results["unique_seqs"] = list(results["unique_seqs"])
     # turn unique sequences to fasta
-    unique_seqs = results.get("unique_seqs")
-    seqs_to_fasta(seqs=unique_seqs, file_name=fasta_path)
+    seqs_to_fasta(seqs=results["unique_seqs"], file_name=fasta_path)
     return results
 
 
 def fasta_to_embeddings(
-    model_strategy: ModelLoadStrategy, fasta_path: str, embeddings_output_path: str
+    model_strategy: ModelLoadStrategy, fasta_path: Path, embeddings_output_path: str
 ) -> np.ndarray:
     """Run inference to generate embeddings for generated sequences.
 
@@ -73,13 +72,18 @@ def fasta_to_embeddings(
     np.ndarray
         Generated embeddings.
     """
-
-    # run inference
-    embeddings = inference(model_strategy, fasta_path, embeddings_output_path)
+    embeddings = inference(model_strategy, str(fasta_path), embeddings_output_path)
     return embeddings
 
 
-if __name__ == "__main__":
+def parse_args() -> Namespace:
+    """Parse command line arguments.
+
+    Returns
+    -------
+    Namespace
+        Parsed arguments.
+    """
     parser = ArgumentParser(description="Generate sequences or embeddings.")
     parser.add_argument(
         "-c",
@@ -101,7 +105,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--fasta_path",
         default="",
-        type=str,
+        type=Path,
         help="Path to save or access fasta sequences",
     )
     parser.add_argument(
@@ -119,12 +123,33 @@ if __name__ == "__main__":
         type=int,
         help="Number of non-redundant sequences to generate",
     )
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    """_summary_
+
+    Parameters
+    ----------
+    args : Namespace
+        _description_
+
+    Raises
+    ------
+    ValueError
+        _description_
+    ValueError
+        _description_
+    FileExistsError
+        _description_
+    ValueError
+        _description_
+    """
     config = ModelSettings.from_yaml(args.config)
 
     # set up torch environment
     os.environ["TOKENIZERS_PARALLELISM"] = "true"
-    torch.set_num_threads(config.num_data_workers)  # type: ignore[attr-defined]
+    torch.set_num_threads(config.num_data_workers)  # pylint: disable=no-member
     pl.seed_everything(0)
 
     # get model_strategy
@@ -156,3 +181,8 @@ if __name__ == "__main__":
         )
     else:
         raise ValueError(f"Invalid mode: {args.mode}")
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main()

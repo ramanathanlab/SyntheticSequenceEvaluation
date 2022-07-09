@@ -8,7 +8,8 @@ from time import gmtime
 handler = logging.StreamHandler()
 handler.setFormatter(
     logging.Formatter(
-        fmt="%(asctime)s.%(msecs)03dZ|%(process)d|%(thread)d|%(levelname)s|%(name)s:%(lineno)s| %(message)s",
+        fmt="%(asctime)s.%(msecs)03dZ|%(process)d|%(thread)d"
+        "|%(levelname)s|%(name)s:%(lineno)s| %(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S",
     )
 )
