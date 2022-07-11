@@ -1,0 +1,6 @@
+jupyterlab
+scikit-learn
+mdlearn
+matplotlib
+plotly
+git+https://github.com/ramanathanlab/gene_transformer

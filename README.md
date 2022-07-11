@@ -2,6 +2,8 @@
 Pipeline to evaluate synthetic sequences. 
 
 # Installation & Setup
+
+### Conda setup
 In the base environment of the lambda server, run the following commands:
 ```
 conda create -n mdhpipeline -c rapidsai -c nvidia -c conda-forge  \
@@ -18,6 +20,18 @@ pip uninstall torch
 pip install torch --no-cache-dir
 pip install plotly==5.8.2
 
+```
+
+### PyPI setup
+```
+python3 -m venv env
+source env/bin/activate
+pip3 install -U pip setuptools wheel
+pip3 install -r requirements/dev.txt
+pip3 install -r requirements/requirements.txt
+pip3 install -e .
+pip3 install torch
+pip3 install pytorch-lightning
 ```
 # Running Alphafold
 First log in to Lambda. Then add the following to .bashrc by: 
@@ -54,25 +68,13 @@ scp -r username@lambda:/homes/lind/examplerun/ local/directory/path
 ```
 For example, this might be ```scp -r lind@lambda.cels.anl.gov:/homes/lind/examplerun/* ~/Documents/mdh_results``` for me. 
 
+# Running generate.py
+## Example 1: Running ```generate_fasta```
+```
+python3 generate.py --mode get_fasta --config /homes/lind/MDH-pipeline/mdh_gpt.yaml --pt_path /homes/mzvyagin/gpt2_mdh_example/gpt2_earnest_river_122_mdh.pt --fasta_path /homes/lind/MDH-pipeline/fasta/fasta_test3.fasta
+```
 
-
-
-# Running the code
-TODO: Update with a description of which commands you use to run your software.
-
-If your code is stored in jupyter notebooks, then specify which notebook you run here.
-
-Note: jupyter notebooks should be stored in the `notebooks` folder
-
-
-# Data
-TODO: Descirption of any data you have stored in the `data/` folder.
-
-# Notes
-TODO: Any other comments or open issues
-
-# Tips
-For extra help on the following topics, please see the links below:
-- GitHub: https://skills.github.com/
-- Linux/GitHub/ComputerScience: https://missing.csail.mit.edu/
-- Python: https://www.youtube.com/playlist?list=PLQVvvaa0QuDeAams7fkdcwOGBpGdHpXln 
+## Example 2: Running ```fasta_to_embeddings```
+```
+python3 generate.py --mode get_embeddings --config /homes/lind/MDH-pipeline/mdh_gpt.yaml --pt_path /homes/mzvyagin/gpt2_mdh_example/gpt2_earnest_river_122_mdh.pt --fasta_path /homes/lind/MDH-pipeline/fasta/fasta_test3.fasta --embeddings_output_path /homes/lind/MDH-pipeline/embeddings/embeddings_test3.npy
+```
