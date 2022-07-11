@@ -126,8 +126,11 @@ def parse_args() -> Namespace:
     return parser.parse_args()
 
 
-def main():
-    """Run generate_fasta or fasta_to_embeddings to generate fasta or embeddings based on parsed arguments.
+def main() -> None:
+    """Generate sequeneces or sequence embeddings.
+
+    Run generate_fasta or fasta_to_embeddings to generate
+    fasta or embeddings based on parsed arguments.
 
     Parameters
     ----------
