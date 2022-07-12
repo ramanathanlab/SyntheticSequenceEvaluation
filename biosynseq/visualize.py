@@ -4,14 +4,14 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Dict
 
-from Bio import SeqIO
 import numpy as np
 import pandas as pd
+from Bio import SeqIO
 
-
-from biosynseq import metrics
+from SyntheticSequenceEvaluation.biosynseq import metrics
 
 logger = logging.getLogger("biosynseq.visualize")
+
 
 def get_embed_avg(embed_path: Path) -> np.ndarray:
     """Given a path to embeddings, return the average embedding.
@@ -28,6 +28,7 @@ def get_embed_avg(embed_path: Path) -> np.ndarray:
     embed = np.load(embed_path)
     embed_avg = embed.mean(axis=1)
     return embed_avg
+
 
 def get_paint_df(fasta_path: Path) -> pd.DataFrame:
     """Given a path to a fasta file,

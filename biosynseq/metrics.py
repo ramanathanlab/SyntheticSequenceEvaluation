@@ -1,6 +1,7 @@
 """Sequence Metrics."""
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 from Bio import SeqUtils
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 
