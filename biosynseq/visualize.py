@@ -326,6 +326,10 @@ def main() -> None:
     print("1")
     if args.mode == "get_tsne":
         print("2")
+        if args.tsne_path is None:
+            print("2_")
+            raise ValueError("tsne_path is not specified.")
+        print("2__")
         embed_avg = get_embed_avg(embed_path=args.embed_path)
         print("3")
         paint_df = get_paint_df(fasta_path=args.fasta_path)
@@ -334,6 +338,10 @@ def main() -> None:
         print("5")
     elif args.mode == "get_umap":
         print("6")
+        if args.umap_path is None:
+            print("6_")
+            raise ValueError("umap_path is not specified.")
+        print("6__")
         embed_avg = get_embed_avg(embed_path=args.embed_path)
         print("7")
         paint_df = get_paint_df(fasta_path=args.fasta_path)
