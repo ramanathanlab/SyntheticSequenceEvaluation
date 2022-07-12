@@ -1,61 +1,20 @@
 """Visualize synthetic sequences using t-SNE, UMAP, and other visualization schemes."""
 import logging
-import os
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
-import matplotlib.pyplot as plt
+from Bio import SeqIO
 import numpy as np
 import pandas as pd
-from Bio import SeqIO, SeqRecord, SeqUtils
-from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
-from cuml.manifold import TSNE, UMAP
-from mdlearn.utils import plot_scatter
-from pkg_resources import require  # need to import matplotlib before pandas
-
-logger = logging.getLogger(__name__)
 
 
-def get_embed_avg(embed_path: Path) -> np.ndarray:
-    """Given a path to embeddings, return the average embedding.
+from biosynseq import metrics
 
-    Parameters
-    ----------
-    embed_path : Path
-        Path to access embeddings.
-        The embeddings could be for the training, validation, testing, or generated sequences.
-
-    Returns
-    -------
-    np.ndarray
-        Average embedding.
-    """
-    embed = np.load(embed_path)
-    embed_avg = embed.mean(axis=1)
-    return embed_avg
+logger = logging.getLogger("biosynseq.visualize")
 
 
-"""Sequence Metrics"""
-
-
-def gc_content(seqs):
-    return [SeqUtils.GC(rec.seq) for rec in seqs]
-
-
-def seq_length(seqs):
-    return [len(rec.seq) for rec in seqs]
-
-
-def molecular_weight(protein_seqs):
-    return [SeqUtils.molecular_weight(rec.seq, "protein") for rec in protein_seqs]
-
-
-def isoelectric_point(protein_seqs):
-    return [IsoelectricPoint(seq).pi() for seq in protein_seqs]
-
-
-def get_paint_df(fasta_path: Path) -> pd.core.frame.DataFrame:
+def get_paint_df(fasta_path: Path) -> pd.DataFrame:
     """Given a path to a fasta file,
     return a dataframe with information of the GC content and sequence length of each DNA sequence,
     as well as the molecular weight and isoelectric point of the protein translated from each DNA sequence.
@@ -67,7 +26,7 @@ def get_paint_df(fasta_path: Path) -> pd.core.frame.DataFrame:
 
     Returns
     -------
-    pd.core.frame.DataFrame
+    pd.DataFrame
         Dataframe containing information of the GC content, sequence length,
         molecular weight, and isolelectric point derived from each DNA sequence.
     """
@@ -76,10 +35,10 @@ def get_paint_df(fasta_path: Path) -> pd.core.frame.DataFrame:
     protein_seqs = [s.translate(to_stop=True) for s in seqs]
     paint_df = pd.DataFrame(
         {
-            "GC": gc_content(seqs),
-            "SequenceLength": seq_length(seqs),
-            "MolecularWeight": molecular_weight(protein_seqs),
-            "IsoelectricPoint": isoelectric_point(protein_seqs),
+            "GC": metrics.gc_content(seqs),
+            "SequenceLength": metrics.seq_length(seqs),
+            "MolecularWeight": metrics.molecular_weight(protein_seqs),
+            "IsoelectricPoint": metrics.isoelectric_point(protein_seqs),
         }
     )
     return paint_df
@@ -98,6 +57,8 @@ def run_tsne(embed_data: np.ndarray) -> np.ndarray:
     np.ndarray
         Transformed embeddings after running t-SNE.
     """
+    from cuml.manifold import TSNE
+
     # embed_data must be 2D since rapidsai only supports 2D data
     model = TSNE(n_components=2, method="barnes_hut")
     data_proj = model.fit_transform(embed_data)
@@ -110,7 +71,7 @@ def plot_tsne(
     paint_name: str,
     tsne_path: Path,
     cmap: str = "viridis",
-) -> pd.core.frame.DataFrame:
+) -> pd.DataFrame:
     """Plot t-SNE visualizations for each sequence metric and
     save the plots as separate images to the specified directory.
 
@@ -129,7 +90,7 @@ def plot_tsne(
 
     Returns
     -------
-    pd.core.frame.DataFrame
+    pd.DataFrame
         Dataframe with plotting values.
 
     Raises
@@ -149,7 +110,7 @@ def plot_tsne(
     fig.show()
 
     # save each tsne plot as a separate png image in the specified directory, tsne_path
-    if os.path.isdir(tsne_path):
+    if tsne_path.is_dir():
         fig.savefig(tsne_path / (f"{paint_name}_tsne.png"), dpi=300)
     else:
         raise ValueError(f"{tsne_path} is not a directory!")
@@ -157,8 +118,8 @@ def plot_tsne(
 
 
 def get_tsne(
-    embed_data: np.ndarray, paint_df: pd.core.frame.DataFrame, tsne_path: Path
-) -> pd.core.frame.DataFrame:
+    embed_data: np.ndarray, paint_df: pd.DataFrame, tsne_path: Path
+) -> Dict[str, pd.DataFrame]:
     """Given 2-dimensional sequence embeddings and sequence metrics dataframe,
     plot and save t-SNE visualizations to specified directory.
 
@@ -166,25 +127,26 @@ def get_tsne(
     ----------
     embed_data : np.ndarray
         Sequence embeddings to be transformed by t-SNE. Must be 2-dimensional.
-    paint_df : pd.core.frame.DataFrame
+    paint_df : pd.DataFrame
         Dataframe containing information of sequence metrics for each DNA sequence.
     tsne_path : Path
         Path to save t-SNE plots. Must be a directory.
 
     Returns
     -------
-    pd.core.frame.DataFrame
+    pd.DataFrame
         Dataframe with plotting values.
     """
     data_tsne = run_tsne(embed_data=embed_data)
-    for key in paint_df:
-        df = plot_tsne(
+    return {
+        str(key): plot_tsne(
             data_proj=data_tsne,
-            paint=paint_df[key],
-            paint_name=key,
+            paint=paint_df[key].values,
+            paint_name=str(key),
             tsne_path=tsne_path,
         )
-    return df
+        for key in paint_df
+    }
 
 
 def parse_args() -> Namespace:
@@ -217,19 +179,19 @@ def parse_args() -> Namespace:
 
 
 def main() -> None:
-    print("1")
+    logger.debug("1")
     if args.mode == "get_tsne":
-        print("2")
-        embed_avg = get_embed_avg(embed_path=args.embed_path)
-        print("3")
+        logger.debug("2")
+        embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
+        logger.debug("3")
         paint_df = get_paint_df(fasta_path=args.fasta_path)
-        print("4")
+        logger.debug("4")
         get_tsne(embed_data=embed_avg, paint_df=paint_df, tsne_path=args.tsne_path)
-        print("5")
+        logger.debug("5")
     else:
-        print("6")
+        logger.debug("6")
         raise ValueError(f"Invalid mode: {args.mode}")
-    print("7")
+    logger.debug("7")
 
 
 if __name__ == "__main__":

@@ -3,4 +3,5 @@ scikit-learn
 mdlearn
 matplotlib
 plotly
+biopython
 git+https://github.com/ramanathanlab/gene_transformer
