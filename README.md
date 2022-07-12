@@ -78,3 +78,9 @@ python3 generate.py --mode get_fasta --config /homes/lind/MDH-pipeline/mdh_gpt.y
 ```
 python3 generate.py --mode get_embeddings --config /homes/lind/MDH-pipeline/mdh_gpt.yaml --pt_path /homes/mzvyagin/gpt2_mdh_example/gpt2_earnest_river_122_mdh.pt --fasta_path /homes/lind/MDH-pipeline/fasta/fasta_test3.fasta --embeddings_output_path /homes/lind/MDH-pipeline/embeddings/embeddings_test3.npy
 ```
+
+# Running visualize.py
+## Example 1: Running ```get_tsne```
+```
+python3 visualize.py --mode get_tsne --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --tsne_path /homes/lind/MDH-pipeline/visualize/
+```
