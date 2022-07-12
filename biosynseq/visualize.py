@@ -53,7 +53,9 @@ def molecular_weight(protein_seqs):
 
 
 def isoelectric_point(protein_seqs):
-    return [SeqUtils.IsoelectricPoint(seq).pi() for seq in protein_seqs]
+    return [
+        SeqUtils.IsoelectricPoint.IsoelectricPoint(seq).pi() for seq in protein_seqs
+    ]
 
 
 def get_paint_df(fasta_path: Path) -> pd.core.frame.DataFrame:
@@ -220,7 +222,7 @@ def parse_args() -> Namespace:
 def main() -> None:
     logging.basicConfig(filename="visualize.py", level=logging.DEBUG)
     logger.debug("1")
-    print("1")
+    # print("1")
     if args.mode == "get_tsne":
         logger.debug("2")
         print("2")
