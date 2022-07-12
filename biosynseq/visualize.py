@@ -8,32 +8,18 @@ import numpy as np
 import pandas as pd
 from Bio import SeqIO
 
-from SyntheticSequenceEvaluation.biosynseq import metrics
+from biosynseq import metrics
 
 logger = logging.getLogger("biosynseq.visualize")
 
 
-def get_embed_avg(embed_path: Path) -> np.ndarray:
-    """Given a path to embeddings, return the average embedding.
-    Parameters
-    ----------
-    embed_path : Path
-        Path to access embeddings.
-        The embeddings could be for the training, validation, testing, or generated sequences.
-    Returns
-    -------
-    np.ndarray
-        Average embedding.
-    """
-    embed = np.load(embed_path)
-    embed_avg = embed.mean(axis=1)
-    return embed_avg
-
-
 def get_paint_df(fasta_path: Path) -> pd.DataFrame:
-    """Given a path to a fasta file,
-    return a dataframe with information of the GC content and sequence length of each DNA sequence,
-    as well as the molecular weight and isoelectric point of the protein translated from each DNA sequence.
+    """Collect a set of scalar arrays to paint with.
+
+    Given a path to a fasta file, return a dataframe with information
+    of the GC content and sequence length of each DNA sequence, as well
+    as the molecular weight and isoelectric point of the protein translated
+    from each DNA sequence.
 
     Parameters
     ----------

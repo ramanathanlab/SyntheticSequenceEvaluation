@@ -18,7 +18,7 @@ format:
 lint:
 	$(black) --check --diff
 	$(flake8)
-	$(pylint)
+	#$(pylint)
 	$(pydocstyle)
 
 .PHONY: mypy
