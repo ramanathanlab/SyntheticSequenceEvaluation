@@ -150,7 +150,7 @@ def plot_tsne(
 
     # save each tsne plot as a separate png image in the specified directory, tsne_path
     if os.path.isdir(tsne_path):
-        fig.savefig(tsne_path / (f"{paint_name}.png"), dpi=300)
+        fig.savefig(tsne_path / (f"{paint_name}_tsne.png"), dpi=300)
     else:
         raise ValueError(f"{tsne_path} is not a directory!")
     return df
@@ -217,26 +217,18 @@ def parse_args() -> Namespace:
 
 
 def main() -> None:
-    logging.basicConfig(filename="visualize.py", level=logging.DEBUG)
-    logger.debug("1")
     print("1")
     if args.mode == "get_tsne":
-        logger.debug("2")
         print("2")
         embed_avg = get_embed_avg(embed_path=args.embed_path)
-        logger.debug("3")
         print("3")
         paint_df = get_paint_df(fasta_path=args.fasta_path)
-        logger.debug("4")
         print("4")
         get_tsne(embed_data=embed_avg, paint_df=paint_df, tsne_path=args.tsne_path)
-        logger.debug("5")
         print("5")
     else:
-        logger.debug("6")
         print("6")
         raise ValueError(f"Invalid mode: {args.mode}")
-    logger.debug("7")
     print("7")
 
 
