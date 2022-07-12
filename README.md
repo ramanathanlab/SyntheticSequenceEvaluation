@@ -84,3 +84,7 @@ python3 generate.py --mode get_embeddings --config /homes/lind/MDH-pipeline/mdh_
 ```
 python3 visualize.py --mode get_tsne --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --tsne_path /homes/lind/MDH-pipeline/visualize/
 ```
+## Example 2: Running ```get_umap```
+```
+python3 visualize.py --mode get_umap --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --tsne_path /homes/lind/MDH-pipeline/visualize/
+```
