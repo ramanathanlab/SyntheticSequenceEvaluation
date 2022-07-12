@@ -291,6 +291,10 @@ def main() -> None:
     logger.debug("1")
     if args.mode == "get_tsne":
         logger.debug("2")
+        if args.tsne_path is None:
+            logger.debug("2_")
+            raise ValueError("tsne_path is not specified.")
+        logger.debug("2__")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
         logger.debug("3")
         paint_df = get_paint_df(fasta_path=args.fasta_path)
@@ -299,6 +303,10 @@ def main() -> None:
         logger.debug("5")
     elif args.mode == "get_umap":
         logger.debug("6")
+        if args.umap_path is None:
+            logger.debug("6_")
+            raise ValueError("umap_path is not specified.")
+        logger.debug("6__")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
         logger.debug("7")
         paint_df = get_paint_df(fasta_path=args.fasta_path)
