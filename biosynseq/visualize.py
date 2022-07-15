@@ -5,6 +5,7 @@ from ctypes import alignment
 from pathlib import Path
 from typing import Dict
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from Bio import SeqIO
