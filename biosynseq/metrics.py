@@ -5,13 +5,12 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from Bio import Align, SeqUtils, pairwise2
+from Bio import Align, SeqIO, SeqUtils, pairwise2
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 from scipy.spatial import distance_matrix
 from tqdm import tqdm
-from Bio import SeqIO
 
 
 def get_embed_avg(embed_path: Path) -> np.ndarray:
@@ -202,7 +201,10 @@ def alignment_scores_parallel(
         If alignment_type is neither "global" nor "local."
     """
 
-    if alignment_type is not ("global" or "local"):
+    # if alignment_type is not ("global" or "local"):
+    #     raise ValueError(f"Invalid alignment_type: {alignment_type}")
+
+    if (alignment_type != "global") and (alignment_type != "local"):
         raise ValueError(f"Invalid alignment_type: {alignment_type}")
 
     # save sequences as Seq objects rather than SeqRecord objects, since PairwiseAligner must work with Seq objects, not SeqRecord objects
@@ -310,10 +312,7 @@ def get_scores_df(
     embed_dist_upper = get_embed_dist_flatten(embed_avg=embed_avg)
     scores_upper = get_scores_flatten(scores_matrix=scores_matrix)
     scores_df = pd.DataFrame(
-        {
-            "Embedding L2 Distance": embed_dist_upper,
-            align_key: scores_upper,
-        }
+        {"Embedding L2 Distance": embed_dist_upper, align_key: scores_upper,}
     )
     return scores_df
 
