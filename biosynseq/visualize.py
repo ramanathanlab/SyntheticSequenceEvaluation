@@ -1,6 +1,7 @@
 """Visualize synthetic sequences using t-SNE, UMAP, and other visualization schemes."""
 import logging
 from argparse import ArgumentParser, Namespace
+from ctypes import alignment
 from pathlib import Path
 from typing import Dict
 
@@ -32,9 +33,14 @@ def get_paint_df(fasta_path: Path) -> pd.DataFrame:
         Dataframe containing information of the GC content, sequence length,
         molecular weight, and isolelectric point derived from each DNA sequence.
     """
-    seqs = list(SeqIO.parse(fasta_path, "fasta"))
-    # translate DNA seqs to protein seqs; stop translation at the first in-frame stop codon
-    protein_seqs = [s.translate(to_stop=True) for s in seqs]
+    # seqs = list(SeqIO.parse(fasta_path, "fasta"))
+    # # translate DNA seqs to protein seqs; stop translation at the first in-frame stop codon
+    # protein_seqs = [s.translate(to_stop=True) for s in seqs]
+
+    seqs = metrics.get_seqs_from_fasta(fasta_path=fasta_path)
+    protein_seqs = metrics.get_seqs_from_fasta(
+        fasta_path=fasta_path, translate_to_protein=True
+    )
     paint_df = pd.DataFrame(
         {
             "GC": metrics.gc_content(seqs),
@@ -256,6 +262,72 @@ def get_umap(
     }
 
 
+def plot_AlignScore_EmbedDist(
+    avg_scores_df: pd.DataFrame, save_path: Path, alignment_type: str = "global"
+) -> str:
+    """Plot the Pairwise Alignment Score (Global or Local) vs. Embedding L2 Distance,
+    and save the plot to the specified directory.
+
+    Parameters
+    ----------
+    avg_scores_df : pd.DataFrame
+        Three-column dataframe comparing the average L2 distance,
+    standard deviation of the L2 distance, and the pairwise alignment scores.
+    save_path : Path
+        Path to save the Pairwise Alignment Score vs. Embedding L2 Distance plot. Must be a directory.
+    alignment_type : str, optional
+        "global" or "local", by default "global."
+
+    Returns
+    -------
+    str
+        Statement indicating that plot saving has been complete.
+
+    Raises
+    ------
+    ValueError
+        If alignment_type is neither "global" nor "local."
+    ValueError
+        If the path to save the plot is not a directory.
+    """
+    if alignment_type == "global":
+        align_key = "Global Alignment Score"
+    elif alignment_type == "local":
+        align_key = "Local Alignment Score"
+    else:
+        raise ValueError(f"Invalid alignment type: {alignment_type}")
+
+    lower_bound = avg_scores_df["avg_embed_dist"] - avg_scores_df["stdev_embed_dist"]
+    upper_bound = avg_scores_df["avg_embed_dist"] + avg_scores_df["stdev_embed_dist"]
+
+    plt.plot(
+        avg_scores_df[align_key],
+        avg_scores_df["avg_embed_dist"],
+        linewidth=3,
+        label="average embedding distance",
+    )
+    plt.fill_between(
+        avg_scores_df[align_key],
+        lower_bound,
+        upper_bound,
+        alpha=0.3,
+        label="stdev embedding distance",
+    )
+    plt.ylabel("L2 Embedding Distance", fontsize=14)
+    plt.xlabel(align_key, fontsize=14)
+    plt.title(align_key + " vs. L2 Embedding Distance")
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.legend()
+
+    if save_path.is_dir():
+        plt.savefig(save_path / ("AlignScore_EmbedDist.png"), dpi=300)
+    else:
+        raise ValueError(f"{save_path} is not a directory!")
+
+    return f"Alignment Score vs. Embedding Distance plot has been saved to {save_path}."
+
+
 def parse_args() -> Namespace:
     """Parse command line arguments.
 
@@ -266,15 +338,19 @@ def parse_args() -> Namespace:
     """
     parser = ArgumentParser(description="Generate sequences or embeddings.")
     parser.add_argument(
-        "--mode", type=str, required=True, help="Allowed inputs: get_tsne, get_umap"
+        "--mode",
+        type=str,
+        required=True,
+        help="Allowed inputs: get_tsne, get_umap, get_align_plot",
     )
     parser.add_argument(
         "--embed_path",
         type=Path,
+        required=True,
         help="Path to access embeddings. Embeddings could be for training, validation, testing, or generated sequences.",
     )
     parser.add_argument(
-        "--fasta_path", type=Path, help="Path to access fasta sequences."
+        "--fasta_path", type=Path, required=True, help="Path to access fasta sequences."
     )
     parser.add_argument(
         "--tsne_path",
@@ -286,6 +362,45 @@ def parse_args() -> Namespace:
         type=Path,
         help="Path to save UMAP plots. Must lead to a directory, not a file.",
     )
+    parser.add_argument(
+        "--align_plot_path",
+        type=Path,
+        help="Path to save the Alignment Score vs. Embedding Distance plot. Must be a directory.",
+    )
+    parser.add_argument(
+        "--alignment_type", default="global", type=str, help="global or local"
+    )
+    parser.add_argument(
+        "--num_workers",
+        default=1,
+        type=int,
+        help="Number of concurrent processes of execution.",
+    )
+    parser.add_argument(
+        "--match_score",
+        default=1.0,
+        type=float,
+        help="Match score to calculate global or local alignment scores using Align.PairwiseAligner.",
+    )
+    parser.add_argument(
+        "--mismatch_score",
+        default=0.0,
+        type=float,
+        help="Mismatch score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
+    )
+    parser.add_argument(
+        "--open_gap_score",
+        default=0.0,
+        type=float,
+        help="Open gap score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
+    )
+    parser.add_argument(
+        "--extend_gap_score",
+        default=0.0,
+        type=float,
+        help="Extend gap score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
+    )
+
     return parser.parse_args()
 
 
@@ -314,10 +429,47 @@ def main() -> None:
         paint_df = get_paint_df(fasta_path=args.fasta_path)
         logger.debug("8")
         get_umap(embed_data=embed_avg, paint_df=paint_df, umap_path=args.umap_path)
-    else:
+    elif args.mode == "get_align_plot":
         logger.debug("9")
+        if args.align_plot_path is None:
+            raise ValueError("align_plot_path is not specified.")
+        logger.debug("10")
+        embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
+        logger.debug("11")
+        protein_seqs = metrics.get_seqs_from_fasta(
+            fasta_path=args.fasta_path, translate_to_protein=True
+        )
+        logger.debug("12")
+        protein_align_scores_matrix = metrics.alignment_scores_parallel(
+            seqs1_rec=protein_seqs,
+            seqs2_rec=protein_seqs,
+            alignment_type=args.alignment_type,
+            num_workers=args.num_workers,
+            match_score=args.match_score,
+            mismatch_score=args.mismatch_score,
+            open_gap_score=args.open_gap_score,
+            extend_gap_score=args.extend_gap_score,
+        )
+        logger.debug("13")
+        scores_df = metrics.get_scores_df(
+            embed_avg=embed_avg,
+            scores_matrix=protein_align_scores_matrix,
+            alignment_type=args.alignment_type,
+        )
+        logger.debug("14")
+        avg_scores_df = metrics.get_avg_scores_df(
+            scores_df=scores_df, alignment_type=args.alignment_type
+        )
+        logger.debug("15")
+        plot_AlignScore_EmbedDist(
+            avg_scores_df=avg_scores_df,
+            save_path=args.align_plot_path,
+            alignment_type=args.alignment_type,
+        )
+    else:
+        logger.debug("16")
         raise ValueError(f"Invalid mode: {args.mode}")
-    logger.debug("10")
+    logger.debug("17")
 
 
 if __name__ == "__main__":
