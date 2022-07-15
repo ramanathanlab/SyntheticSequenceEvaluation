@@ -88,3 +88,5 @@ python3 visualize.py --mode get_tsne --embed_path /homes/mzvyagin/MDH/perlmutter
 ```
 python3 visualize.py --mode get_umap --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --tsne_path /homes/lind/MDH-pipeline/visualize/
 ```
+## Example 3: Running ```plot_AlignScore_EmbedDist```
+python3 visualize.py --mode get_align_plot --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --align_plot_path /homes/lind/MDH-pipeline/visualize/ --alignment_type global --num_workers 70

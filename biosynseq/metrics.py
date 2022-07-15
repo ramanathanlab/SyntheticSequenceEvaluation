@@ -11,6 +11,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
 from scipy.spatial import distance_matrix
 from tqdm import tqdm
+from Bio import SeqIO
 
 
 def get_embed_avg(embed_path: Path) -> np.ndarray:
