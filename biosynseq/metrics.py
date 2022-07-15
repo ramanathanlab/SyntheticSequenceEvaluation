@@ -2,6 +2,8 @@
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import List
+import functools
+import itertools
 
 import numpy as np
 import pandas as pd
@@ -231,6 +233,125 @@ def alignment_scores_parallel(
     return np.array(scores_matrix)
 
 
+def compute_alignment_scores_v2(
+    target_seq: Seq,
+    query_seqs: List[Seq],
+    alignment_type: str = "global",
+    match_score: float = 1.0,
+    mismatch_score: float = 0.0,
+    open_gap_score: float = 0.0,
+    extend_gap_score: float = 0.0,
+) -> np.ndarray:
+    """Compute global or local pairwise alignment scores between a target sequence and an array of query sequences.
+
+    Compute global or local pairwise alignment scores (DNA, RNA, or protein) between a target sequence
+    and an array of query sequences, given score calculation configurations. Return an array
+    of scores, each score being the pairwise alignment score between the target sequence
+    and each of the query sequences.
+
+    Parameters
+    ----------
+    target_seq : Seq
+        Sequence to align against.
+    query_seqs : List[Seq]
+        Sequences to align.
+    alignment_type : str, optional
+        "global" or "local", by default "global."
+    match_score : float, optional
+        Score for each matched alignment, by default 1.0.
+    mismatch_score : float, optional
+        Score for each mismatched alignment, by default 0.0.
+    open_gap_score : float, optional
+        Score for each gap opening, by default 0.0.
+    extend_gap_score : float, optional
+        Score for each gap extension, by default 0.0.
+
+    Returns
+    -------
+    np.ndarray
+        An array of pairwise alignment scores between the target sequence and an array of query sequences.
+    """
+    aligner = Align.PairwiseAligner(
+        mode=alignment_type,
+        match_score=match_score,
+        mismatch_score=mismatch_score,
+        open_gap_score=open_gap_score,
+        extend_gap_score=extend_gap_score,
+    )
+    scores = np.array([aligner.align(target_seq, seq).score for seq in query_seqs])
+    return scores
+
+
+def alignment_scores_parallel_v2(
+    seqs1_rec: List[SeqRecord],
+    seqs2_rec: List[SeqRecord],
+    alignment_type: str = "global",
+    match_score: float = 1.0,
+    mismatch_score: float = 0.0,
+    open_gap_score: float = 0.0,
+    extend_gap_score: float = 0.0,
+    num_workers: int = 1,
+) -> np.ndarray:
+    """Compute pairwise alignment scores between all sequences in seqs1_rec and seqs2_rec.
+    Sequences can be for DNA, RNA, or protein.
+
+    Parameters
+    ----------
+    seqs1_rec : List[SeqRecord]
+        First collection of sequences.
+    seqs2_rec : List[SeqRecord]
+        Second collection of sequences.
+    alignment_type : str, optional
+        "global" or "local", by default "global."
+    match_score : float, optional
+        Score for each matched alignment, by default 1.0.
+    mismatch_score : float, optional
+        Score for each mismatched alignment, by default 0.0.
+    open_gap_score : float, optional
+        Score for each gap opening, by default 0.0.
+    extend_gap_score : float, optional
+        Score for each gap extension, by default 0.0.
+    num_workers : int, optional
+        Number of concurrent processes of execution, by default 1.
+
+    Returns
+    -------
+    np.ndarray
+        A scores matrix containing pairwise alignment scores between all sequences in seqs1_rec and seqs2_rec.
+
+    Raises
+    ------
+    ValueError
+        If alignment_type is neither "global" nor "local."
+    """
+    if alignment_type not in ("global", "local"):
+        raise ValueError(f"Invalid alignment_type: {alignment_type}")
+
+    # save sequences as Seq objects rather than SeqRecord objects, since
+    # PairwiseAligner must work with Seq objects, not SeqRecord objects
+    target_seqs = list(Seq(rec.seq) for rec in seqs1_rec)
+    query_seqs = list(Seq(rec.seq) for rec in seqs2_rec)
+    query_seqs = itertools.cycle(query_seqs)
+
+    alignment_fn = functools.partial(
+        compute_alignment_scores_v2,
+        alignment_type=alignment_type,
+        match_score=match_score,
+        mismatch_score=mismatch_score,
+        open_gap_score=open_gap_score,
+        extend_gap_score=extend_gap_score,
+    )
+
+    chunksize = len(target_seqs) // num_workers
+    scores_matrix = []
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        for scores in tqdm(
+            executor.map(alignment_fn, target_seqs, query_seqs, chunksize=chunksize)
+        ):
+            scores_matrix.append(scores)
+    return np.array(scores_matrix)
+
+
 def get_embed_dist_flatten(embed_avg: np.ndarray) -> np.ndarray:
     """Given the average sequence embeddings for a number of sequences,
     get the flattened distance matrix between all embeddings.
@@ -312,7 +433,10 @@ def get_scores_df(
     embed_dist_upper = get_embed_dist_flatten(embed_avg=embed_avg)
     scores_upper = get_scores_flatten(scores_matrix=scores_matrix)
     scores_df = pd.DataFrame(
-        {"Embedding L2 Distance": embed_dist_upper, align_key: scores_upper,}
+        {
+            "Embedding L2 Distance": embed_dist_upper,
+            align_key: scores_upper,
+        }
     )
     return scores_df
 
