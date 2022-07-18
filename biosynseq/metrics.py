@@ -1,13 +1,12 @@
 """Sequence Metrics."""
 import functools
-import itertools
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import List
 
 import numpy as np
 import pandas as pd
-from Bio import Align, SeqIO, SeqUtils, pairwise2
+from Bio import Align, SeqIO, SeqUtils
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqUtils.IsoelectricPoint import IsoelectricPoint
@@ -238,9 +237,6 @@ def alignment_scores_parallel(
         If alignment_type is neither "global" nor "local."
     """
 
-    # if alignment_type is not ("global" or "local"):
-    #     raise ValueError(f"Invalid alignment_type: {alignment_type}")
-
     if (alignment_type != "global") and (alignment_type != "local"):
         raise ValueError(f"Invalid alignment_type: {alignment_type}")
 
@@ -379,7 +375,6 @@ def alignment_scores_parallel_v2(
     )
 
     chunksize = len(seqs1_rec) // num_workers
-    print(chunksize)
     scores_matrix = []
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         for scores in tqdm(

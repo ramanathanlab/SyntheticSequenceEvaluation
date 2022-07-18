@@ -34,20 +34,11 @@ def get_paint_df(fasta_path: Path, embed_path: Path) -> pd.DataFrame:
         Dataframe containing information of the GC content, sequence length,
         molecular weight, and isolelectric point derived from each DNA sequence.
     """
-    # seqs = list(SeqIO.parse(fasta_path, "fasta"))
-    # # translate DNA seqs to protein seqs; stop translation at the first in-frame stop codon
-    # protein_seqs = [s.translate(to_stop=True) for s in seqs]
-
-    # dna_seqs = metrics.get_seqs_from_fasta(fasta_path=fasta_path)
-    # protein_seqs = metrics.get_seqs_from_fasta(
-    #     fasta_path=fasta_path, translate_to_protein=True
-    # )
-
     # get DNA sequences
     dna_seqs = metrics.fasta_to_dna_seqs(fasta_path=fasta_path)
     # clip DNA sequences to embedding length
     embed = np.load(embed_path)
-    dna_seqs = dna_seqs[:len(embed)]
+    dna_seqs = dna_seqs[: len(embed)]
     # translate DNA to protein
     protein_seqs = metrics.dna_to_protein_seqs(dna_seqs=dna_seqs)
 
@@ -410,50 +401,32 @@ def parse_args() -> Namespace:
         type=float,
         help="Extend gap score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
     )
-
     return parser.parse_args()
 
 
 def main() -> None:
-    logger.debug("1")
     if args.mode == "get_tsne":
-        logger.debug("2")
         if args.tsne_path is None:
-            logger.debug("2_")
             raise ValueError("tsne_path is not specified.")
-        logger.debug("2__")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
-        logger.debug("3")
         paint_df = get_paint_df(fasta_path=args.fasta_path, embed_path=args.embed_path)
-        logger.debug("4")
         get_tsne(embed_data=embed_avg, paint_df=paint_df, tsne_path=args.tsne_path)
-        logger.debug("5")
+        print(f"t-SNE plots have been saved to {args.tsne_path}.")
     elif args.mode == "get_umap":
-        logger.debug("6")
         if args.umap_path is None:
-            logger.debug("6_")
             raise ValueError("umap_path is not specified.")
-        logger.debug("6__")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
-        logger.debug("7")
         paint_df = get_paint_df(fasta_path=args.fasta_path, embed_path=args.embed_path)
-        logger.debug("8")
         get_umap(embed_data=embed_avg, paint_df=paint_df, umap_path=args.umap_path)
+        print(f"UMAP plots have been saved to {args.umap_path}.")
     elif args.mode == "get_align_plot":
-        logger.debug("9")
         if args.align_plot_path is None:
             raise ValueError("align_plot_path is not specified.")
-        logger.debug("10")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
-        logger.debug("11")
-        # protein_seqs = metrics.get_seqs_from_fasta(
-        #     fasta_path=args.fasta_path, translate_to_protein=True
-        # )
         dna_seqs = metrics.fasta_to_dna_seqs(fasta_path=args.fasta_path)
         embed = np.load(args.embed_path)
-        dna_seqs = dna_seqs[:len(embed)] # clip DNA sequence to embedding length
+        dna_seqs = dna_seqs[: len(embed)]  # clip DNA sequence to embedding length
         protein_seqs = metrics.dna_to_protein_seqs(dna_seqs=dna_seqs)
-        logger.debug("12")
         protein_align_scores_matrix = metrics.alignment_scores_parallel_v2(
             seqs1_rec=protein_seqs,
             seqs2_rec=protein_seqs,
@@ -464,26 +437,24 @@ def main() -> None:
             open_gap_score=args.open_gap_score,
             extend_gap_score=args.extend_gap_score,
         )
-        logger.debug("13")
         scores_df = metrics.get_scores_df(
             embed_avg=embed_avg,
             scores_matrix=protein_align_scores_matrix,
             alignment_type=args.alignment_type,
         )
-        logger.debug("14")
         avg_scores_df = metrics.get_avg_scores_df(
             scores_df=scores_df, alignment_type=args.alignment_type
         )
-        logger.debug("15")
         plot_AlignScore_EmbedDist(
             avg_scores_df=avg_scores_df,
             save_path=args.align_plot_path,
             alignment_type=args.alignment_type,
         )
+        print(
+            f"AlignScore vs. EmbedDist Plot has been saved to {args.align_plot_path}."
+        )
     else:
-        logger.debug("16")
         raise ValueError(f"Invalid mode: {args.mode}")
-    logger.debug("17")
 
 
 if __name__ == "__main__":

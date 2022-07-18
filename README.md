@@ -86,7 +86,7 @@ python3 visualize.py --mode get_tsne --embed_path /homes/mzvyagin/MDH/perlmutter
 ```
 ## Example 2: Running ```get_umap```
 ```
-python3 visualize.py --mode get_umap --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --tsne_path /homes/lind/MDH-pipeline/visualize/
+python3 visualize.py --mode get_umap --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --umap_path /homes/lind/MDH-pipeline/visualize/
 ```
 ## Example 3: Running ```plot_AlignScore_EmbedDist```
 Generated sequence:
