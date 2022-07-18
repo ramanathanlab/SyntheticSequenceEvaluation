@@ -15,7 +15,7 @@ from biosynseq import metrics
 logger = logging.getLogger("biosynseq.visualize")
 
 
-def get_paint_df(fasta_path: Path) -> pd.DataFrame:
+def get_paint_df(fasta_path: Path, embed_path: Path) -> pd.DataFrame:
     """Collect a set of scalar arrays to paint with.
 
     Given a path to a fasta file, return a dataframe with information
@@ -38,14 +38,23 @@ def get_paint_df(fasta_path: Path) -> pd.DataFrame:
     # # translate DNA seqs to protein seqs; stop translation at the first in-frame stop codon
     # protein_seqs = [s.translate(to_stop=True) for s in seqs]
 
-    seqs = metrics.get_seqs_from_fasta(fasta_path=fasta_path)
-    protein_seqs = metrics.get_seqs_from_fasta(
-        fasta_path=fasta_path, translate_to_protein=True
-    )
+    # dna_seqs = metrics.get_seqs_from_fasta(fasta_path=fasta_path)
+    # protein_seqs = metrics.get_seqs_from_fasta(
+    #     fasta_path=fasta_path, translate_to_protein=True
+    # )
+
+    # get DNA sequences
+    dna_seqs = metrics.fasta_to_dna_seqs(fasta_path=fasta_path)
+    # clip DNA sequences to embedding length
+    embed = np.load(embed_path)
+    dna_seqs = dna_seqs[:len(embed)]
+    # translate DNA to protein
+    protein_seqs = metrics.dna_to_protein_seqs(dna_seqs=dna_seqs)
+
     paint_df = pd.DataFrame(
         {
-            "GC": metrics.gc_content(seqs),
-            "SequenceLength": metrics.seq_length(seqs),
+            "GC": metrics.gc_content(dna_seqs),
+            "SequenceLength": metrics.seq_length(dna_seqs),
             "MolecularWeight": metrics.molecular_weight(protein_seqs),
             "IsoelectricPoint": metrics.isoelectric_point(protein_seqs),
         }
@@ -415,7 +424,7 @@ def main() -> None:
         logger.debug("2__")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
         logger.debug("3")
-        paint_df = get_paint_df(fasta_path=args.fasta_path)
+        paint_df = get_paint_df(fasta_path=args.fasta_path, embed_path=args.embed_path)
         logger.debug("4")
         get_tsne(embed_data=embed_avg, paint_df=paint_df, tsne_path=args.tsne_path)
         logger.debug("5")
@@ -427,7 +436,7 @@ def main() -> None:
         logger.debug("6__")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
         logger.debug("7")
-        paint_df = get_paint_df(fasta_path=args.fasta_path)
+        paint_df = get_paint_df(fasta_path=args.fasta_path, embed_path=args.embed_path)
         logger.debug("8")
         get_umap(embed_data=embed_avg, paint_df=paint_df, umap_path=args.umap_path)
     elif args.mode == "get_align_plot":
@@ -437,9 +446,13 @@ def main() -> None:
         logger.debug("10")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
         logger.debug("11")
-        protein_seqs = metrics.get_seqs_from_fasta(
-            fasta_path=args.fasta_path, translate_to_protein=True
-        )
+        # protein_seqs = metrics.get_seqs_from_fasta(
+        #     fasta_path=args.fasta_path, translate_to_protein=True
+        # )
+        dna_seqs = metrics.fasta_to_dna_seqs(fasta_path=args.fasta_path)
+        embed = np.load(args.embed_path)
+        dna_seqs = dna_seqs[:len(embed)] # clip DNA sequence to embedding length
+        protein_seqs = metrics.dna_to_protein_seqs(dna_seqs=dna_seqs)
         logger.debug("12")
         protein_align_scores_matrix = metrics.alignment_scores_parallel_v2(
             seqs1_rec=protein_seqs,

@@ -58,6 +58,41 @@ def get_seqs_from_fasta(
     return seqs
 
 
+def fasta_to_dna_seqs(fasta_path: Path) -> List[SeqRecord]:
+    """Given a fasta file, obtain its DNA sequences.
+
+    Parameters
+    ----------
+    fasta_path : Path
+        Path to access the fasta sequences.
+
+    Returns
+    -------
+    List[SeqRecord]
+        DNA sequences from the fasta file.
+    """
+    dna_seqs = list(SeqIO.parse(fasta_path, "fasta"))
+    return dna_seqs
+
+
+def dna_to_protein_seqs(dna_seqs: List[SeqRecord]) -> List[SeqRecord]:
+    """Translate DNA sequenecs to protein sequences.
+    Stop translation at the first in-frame stop codon
+
+    Parameters
+    ----------
+    dna_seqs : List[SeqRecord]
+        List of DNA sequences.
+
+    Returns
+    -------
+    List[SeqRecord]
+        List of protein sequences.
+    """
+    protein_seqs = [seq.translate(to_stop=True) for seq in dna_seqs]
+    return protein_seqs
+
+
 def gc_content(seqs: List[SeqRecord]) -> List:
     """Given a list of DNA sequences, return each sequence's GC content.
 
