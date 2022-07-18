@@ -373,6 +373,12 @@ def parse_args() -> Namespace:
         help="Path to save the Alignment Score vs. Embedding Distance plot. Must be a directory.",
     )
     parser.add_argument(
+        "--align_plot_title",
+        default="",
+        type=str,
+        help="Title for AlignScore vs. EmbedDist plot.",
+    )
+    parser.add_argument(
         "--alignment_type", default="global", type=str, help="global or local"
     )
     parser.add_argument(
@@ -453,6 +459,7 @@ def main() -> None:
             avg_scores_df=avg_scores_df,
             save_path=args.align_plot_path,
             alignment_type=args.alignment_type,
+            plot_title=args.align_plot_title,
         )
         print(
             f"AlignScore vs. EmbedDist Plot has been saved to {args.align_plot_path}."
