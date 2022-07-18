@@ -264,7 +264,10 @@ def get_umap(
 
 
 def plot_AlignScore_EmbedDist(
-    avg_scores_df: pd.DataFrame, save_path: Path, alignment_type: str = "global"
+    avg_scores_df: pd.DataFrame,
+    save_path: Path,
+    alignment_type: str = "global",
+    plot_title: str = "",
 ) -> str:
     """Plot the Pairwise Alignment Score (Global or Local) vs. Embedding L2 Distance,
     and save the plot to the specified directory.
@@ -305,18 +308,19 @@ def plot_AlignScore_EmbedDist(
         avg_scores_df[align_key],
         avg_scores_df["avg_embed_dist"],
         linewidth=3,
-        label="average embedding distance",
+        label="avg embed dist",
     )
     plt.fill_between(
         avg_scores_df[align_key],
         lower_bound,
         upper_bound,
         alpha=0.3,
-        label="stdev embedding distance",
+        label="stdev embed dist",
     )
     plt.ylabel("L2 Embedding Distance", fontsize=14)
     plt.xlabel(align_key, fontsize=14)
-    plt.title(align_key + " vs. L2 Embedding Distance")
+    # plt.title(align_key + " vs. L2 Embedding Distance")
+    plt.title(plot_title)
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
     plt.legend()
