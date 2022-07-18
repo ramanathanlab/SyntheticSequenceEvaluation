@@ -441,7 +441,7 @@ def main() -> None:
             fasta_path=args.fasta_path, translate_to_protein=True
         )
         logger.debug("12")
-        protein_align_scores_matrix = metrics.alignment_scores_parallel(
+        protein_align_scores_matrix = metrics.alignment_scores_parallel_v2(
             seqs1_rec=protein_seqs,
             seqs2_rec=protein_seqs,
             alignment_type=args.alignment_type,

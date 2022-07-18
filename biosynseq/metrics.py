@@ -1,9 +1,9 @@
 """Sequence Metrics."""
+import functools
+import itertools
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import List
-import functools
-import itertools
 
 import numpy as np
 import pandas as pd
@@ -278,7 +278,9 @@ def compute_alignment_scores_v2(
         open_gap_score=open_gap_score,
         extend_gap_score=extend_gap_score,
     )
-    scores = np.array([aligner.align(target_seq, seq).score for seq in query_seqs])
+
+    scores = np.array([aligner.align(target_seq, seq.seq).score for seq in query_seqs])
+
     return scores
 
 
@@ -329,12 +331,11 @@ def alignment_scores_parallel_v2(
 
     # save sequences as Seq objects rather than SeqRecord objects, since
     # PairwiseAligner must work with Seq objects, not SeqRecord objects
-    target_seqs = list(Seq(rec.seq) for rec in seqs1_rec)
-    query_seqs = list(Seq(rec.seq) for rec in seqs2_rec)
-    query_seqs = itertools.cycle(query_seqs)
+    target_seqs = (rec.seq for rec in seqs1_rec)
 
     alignment_fn = functools.partial(
         compute_alignment_scores_v2,
+        query_seqs=seqs2_rec,
         alignment_type=alignment_type,
         match_score=match_score,
         mismatch_score=mismatch_score,
@@ -342,13 +343,15 @@ def alignment_scores_parallel_v2(
         extend_gap_score=extend_gap_score,
     )
 
-    chunksize = len(target_seqs) // num_workers
+    chunksize = len(seqs1_rec) // num_workers
+    print(chunksize)
     scores_matrix = []
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         for scores in tqdm(
-            executor.map(alignment_fn, target_seqs, query_seqs, chunksize=chunksize)
+            executor.map(alignment_fn, target_seqs, chunksize=chunksize)
         ):
             scores_matrix.append(scores)
+
     return np.array(scores_matrix)
 
 
@@ -433,10 +436,7 @@ def get_scores_df(
     embed_dist_upper = get_embed_dist_flatten(embed_avg=embed_avg)
     scores_upper = get_scores_flatten(scores_matrix=scores_matrix)
     scores_df = pd.DataFrame(
-        {
-            "Embedding L2 Distance": embed_dist_upper,
-            align_key: scores_upper,
-        }
+        {"Embedding L2 Distance": embed_dist_upper, align_key: scores_upper,}
     )
     return scores_df
 
