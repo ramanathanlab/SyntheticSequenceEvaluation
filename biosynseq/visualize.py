@@ -317,9 +317,8 @@ def plot_AlignScore_EmbedDist(
         alpha=0.3,
         label="stdev embed dist",
     )
-    plt.ylabel("L2 Embedding Distance", fontsize=14)
+    plt.ylabel("Embedding L2 Distance", fontsize=14)
     plt.xlabel(align_key, fontsize=14)
-    # plt.title(align_key + " vs. L2 Embedding Distance")
     plt.title(plot_title)
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
