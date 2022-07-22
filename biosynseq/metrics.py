@@ -53,25 +53,26 @@ def get_seqs_from_fasta(
     seqs = list(SeqIO.parse(fasta_path, "fasta"))
     if translate_to_protein:
         # translate DNA seqs to protein seqs; stop translation at the first in-frame stop codon
-        seqs = [seq.translate(to_stop=True) for seq in seqs]
+        seqs = dna_to_protein_seqs(dna_seqs=seqs)
+        # seqs = [seq.translate(to_stop=True) for seq in seqs]
     return seqs
 
 
-def fasta_to_dna_seqs(fasta_path: Path) -> List[SeqRecord]:
-    """Given a fasta file, obtain its DNA sequences.
+# def fasta_to_dna_seqs(fasta_path: Path) -> List[SeqRecord]:
+#     """Given a fasta file, obtain its DNA sequences.
 
-    Parameters
-    ----------
-    fasta_path : Path
-        Path to access the fasta sequences.
+#     Parameters
+#     ----------
+#     fasta_path : Path
+#         Path to access the fasta sequences.
 
-    Returns
-    -------
-    List[SeqRecord]
-        DNA sequences from the fasta file.
-    """
-    dna_seqs = list(SeqIO.parse(fasta_path, "fasta"))
-    return dna_seqs
+#     Returns
+#     -------
+#     List[SeqRecord]
+#         DNA sequences from the fasta file.
+#     """
+#     dna_seqs = list(SeqIO.parse(fasta_path, "fasta"))
+#     return dna_seqs
 
 
 def dna_to_protein_seqs(dna_seqs: List[SeqRecord]) -> List[SeqRecord]:
@@ -92,7 +93,7 @@ def dna_to_protein_seqs(dna_seqs: List[SeqRecord]) -> List[SeqRecord]:
     return protein_seqs
 
 
-def gc_content(seqs: List[SeqRecord]) -> List:
+def gc_content(seqs: List[SeqRecord]) -> List[float]:
     """Given a list of DNA sequences, return each sequence's GC content.
 
     Parameters
@@ -108,7 +109,7 @@ def gc_content(seqs: List[SeqRecord]) -> List:
     return [SeqUtils.GC(rec.seq) for rec in seqs]
 
 
-def seq_length(seqs: List[SeqRecord]) -> List:
+def seq_length(seqs: List[SeqRecord]) -> List[float]:
     """Given a list of DNA sequences, return each sequence's length.
 
     Parameters
@@ -124,7 +125,7 @@ def seq_length(seqs: List[SeqRecord]) -> List:
     return [len(rec.seq) for rec in seqs]
 
 
-def molecular_weight(protein_seqs: List[SeqRecord]) -> List:
+def molecular_weight(protein_seqs: List[SeqRecord]) -> List[float]:
     """Given a list of protein sequences, return each protein's molecular weight.
 
     Parameters
@@ -140,7 +141,7 @@ def molecular_weight(protein_seqs: List[SeqRecord]) -> List:
     return [SeqUtils.molecular_weight(rec.seq, "protein") for rec in protein_seqs]
 
 
-def isoelectric_point(protein_seqs: List[SeqRecord]) -> List:
+def isoelectric_point(protein_seqs: List[SeqRecord]) -> List[float]:
     """Given a list of protein sequences, return each protein's isoelectric point.
 
     Parameters
@@ -156,115 +157,115 @@ def isoelectric_point(protein_seqs: List[SeqRecord]) -> List:
     return [IsoelectricPoint(seq).pi() for seq in protein_seqs]
 
 
-def compute_alignment_scores(kwargs: dict) -> np.ndarray:
-    """Compute global or local pairwise alignment scores between a target sequence and an array of query sequences.
+# def compute_alignment_scores(kwargs: dict) -> np.ndarray:
+#     """Compute global or local pairwise alignment scores between a target sequence and an array of query sequences.
 
-    Compute global or local pairwise alignment scores (DNA, RNA, or protein) between a target sequence
-    and an array of query sequences, given score calculation configurations. Return an array
-    of scores, each score being the pairwise alignment score between the target sequence
-    and each of the query sequences.
+#     Compute global or local pairwise alignment scores (DNA, RNA, or protein) between a target sequence
+#     and an array of query sequences, given score calculation configurations. Return an array
+#     of scores, each score being the pairwise alignment score between the target sequence
+#     and each of the query sequences.
 
-    Parameters
-    ----------
-    kwargs : dict
-        Kwargs of arguments to calculate global or local pairwise alignment scores.
+#     Parameters
+#     ----------
+#     kwargs : dict
+#         Kwargs of arguments to calculate global or local pairwise alignment scores.
 
-    Returns
-    -------
-    np.ndarray
-        An array of pairwise alignment scores between the target sequence and an array of query sequences.
-    """
-    # Input arguments to parallel function
-    target_seq = kwargs.get("target_seq")
-    seqs = kwargs.get("query_seqs")
-    alignment_type = kwargs.get("alignment_type")
-    match_score = kwargs.get("match_score")
-    mismatch_score = kwargs.get("mismatch_score")
-    open_gap_score = kwargs.get("open_gap_score")
-    extend_gap_score = kwargs.get("extend_gap_score")
+#     Returns
+#     -------
+#     np.ndarray
+#         An array of pairwise alignment scores between the target sequence and an array of query sequences.
+#     """
+#     # Input arguments to parallel function
+#     target_seq = kwargs.get("target_seq")
+#     seqs = kwargs.get("query_seqs")
+#     alignment_type = kwargs.get("alignment_type")
+#     match_score = kwargs.get("match_score")
+#     mismatch_score = kwargs.get("mismatch_score")
+#     open_gap_score = kwargs.get("open_gap_score")
+#     extend_gap_score = kwargs.get("extend_gap_score")
 
-    aligner = Align.PairwiseAligner()
-    aligner.mode = alignment_type  # default is global, could also be local
-    aligner.match_score = match_score
-    aligner.mismatch_score = mismatch_score
-    aligner.open_gap_score = open_gap_score
-    aligner.extend_gap_score = extend_gap_score
+#     aligner = Align.PairwiseAligner()
+#     aligner.mode = alignment_type  # default is global, could also be local
+#     aligner.match_score = match_score
+#     aligner.mismatch_score = mismatch_score
+#     aligner.open_gap_score = open_gap_score
+#     aligner.extend_gap_score = extend_gap_score
 
-    scores = np.array([aligner.align(target_seq, seq).score for seq in seqs])
-    return scores
-
-
-def alignment_scores_parallel(
-    seqs1_rec: List[SeqRecord],
-    seqs2_rec: List[SeqRecord],
-    alignment_type: str = "global",
-    num_workers: int = 1,
-    match_score: float = 1.0,
-    mismatch_score: float = 0.0,
-    open_gap_score: float = 0.0,
-    extend_gap_score: float = 0.0,
-) -> np.ndarray:
-    """Compute pairwise alignment scores between all sequences in seqs1_rec and seqs2_rec.
-    Sequences can be for DNA, RNA, or protein.
-
-    Parameters
-    ----------
-    seqs1_rec : List[SeqRecord]
-        First collection of sequences.
-    seqs2_rec : List[SeqRecord]
-        Second collection of sequences.
-    alignment_type : str, optional
-        "global" or "local", by default "global."
-    num_workers : int, optional
-        Number of concurrent processes of execution, by default 1.
-    match_score : float, optional
-        Score for each matched alignment, by default 1.0.
-    mismatch_score : float, optional
-        Score for each mismatched alignment, by default 0.0.
-    open_gap_score : float, optional
-        Score for each gap opening, by default 0.0.
-    extend_gap_score : float, optional
-        Score for each gap extension, by default 0.0.
-
-    Returns
-    -------
-    np.ndarray
-        A scores matrix containing pairwise alignment scores between all sequences in seqs1_rec and seqs2_rec.
-
-    Raises
-    ------
-    ValueError
-        If alignment_type is neither "global" nor "local."
-    """
-
-    if (alignment_type != "global") and (alignment_type != "local"):
-        raise ValueError(f"Invalid alignment_type: {alignment_type}")
-
-    # save sequences as Seq objects rather than SeqRecord objects, since PairwiseAligner must work with Seq objects, not SeqRecord objects
-    seqs1 = list(Seq(rec.seq) for rec in seqs1_rec)
-    seqs2 = list(Seq(rec.seq) for rec in seqs2_rec)
-
-    kwargs = [
-        {
-            "target_seq": seq,
-            "query_seqs": seqs2,
-            "alignment_type": alignment_type,
-            "match_score": match_score,
-            "mismatch_score": mismatch_score,
-            "open_gap_score": open_gap_score,
-            "extend_gap_score": extend_gap_score,
-        }
-        for seq in seqs1
-    ]
-
-    scores_matrix = []
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        for scores in tqdm(executor.map(compute_alignment_scores, kwargs)):
-            scores_matrix.append(scores)
-    return np.array(scores_matrix)
+#     scores = np.array([aligner.align(target_seq, seq).score for seq in seqs])
+#     return scores
 
 
-def compute_alignment_scores_v2(
+# def alignment_scores_parallel(
+#     seqs1_rec: List[SeqRecord],
+#     seqs2_rec: List[SeqRecord],
+#     alignment_type: str = "global",
+#     num_workers: int = 1,
+#     match_score: float = 1.0,
+#     mismatch_score: float = 0.0,
+#     open_gap_score: float = 0.0,
+#     extend_gap_score: float = 0.0,
+# ) -> np.ndarray:
+#     """Compute pairwise alignment scores between all sequences in seqs1_rec and seqs2_rec.
+#     Sequences can be for DNA, RNA, or protein.
+
+#     Parameters
+#     ----------
+#     seqs1_rec : List[SeqRecord]
+#         First collection of sequences.
+#     seqs2_rec : List[SeqRecord]
+#         Second collection of sequences.
+#     alignment_type : str, optional
+#         "global" or "local", by default "global."
+#     num_workers : int, optional
+#         Number of concurrent processes of execution, by default 1.
+#     match_score : float, optional
+#         Score for each matched alignment, by default 1.0.
+#     mismatch_score : float, optional
+#         Score for each mismatched alignment, by default 0.0.
+#     open_gap_score : float, optional
+#         Score for each gap opening, by default 0.0.
+#     extend_gap_score : float, optional
+#         Score for each gap extension, by default 0.0.
+
+#     Returns
+#     -------
+#     np.ndarray
+#         A scores matrix containing pairwise alignment scores between all sequences in seqs1_rec and seqs2_rec.
+
+#     Raises
+#     ------
+#     ValueError
+#         If alignment_type is neither "global" nor "local."
+#     """
+
+#     if (alignment_type != "global") and (alignment_type != "local"):
+#         raise ValueError(f"Invalid alignment_type: {alignment_type}")
+
+#     # save sequences as Seq objects rather than SeqRecord objects, since PairwiseAligner must work with Seq objects, not SeqRecord objects
+#     seqs1 = list(Seq(rec.seq) for rec in seqs1_rec)
+#     seqs2 = list(Seq(rec.seq) for rec in seqs2_rec)
+
+#     kwargs = [
+#         {
+#             "target_seq": seq,
+#             "query_seqs": seqs2,
+#             "alignment_type": alignment_type,
+#             "match_score": match_score,
+#             "mismatch_score": mismatch_score,
+#             "open_gap_score": open_gap_score,
+#             "extend_gap_score": extend_gap_score,
+#         }
+#         for seq in seqs1
+#     ]
+
+#     scores_matrix = []
+#     with ProcessPoolExecutor(max_workers=num_workers) as executor:
+#         for scores in tqdm(executor.map(compute_alignment_scores, kwargs)):
+#             scores_matrix.append(scores)
+#     return np.array(scores_matrix)
+
+
+def compute_alignment_scores(
     target_seq: Seq,
     query_seqs: List[Seq],
     alignment_type: str = "global",
@@ -315,7 +316,7 @@ def compute_alignment_scores_v2(
     return scores
 
 
-def alignment_scores_parallel_v2(
+def alignment_scores_parallel(
     seqs1_rec: List[SeqRecord],
     seqs2_rec: List[SeqRecord],
     alignment_type: str = "global",
@@ -365,7 +366,7 @@ def alignment_scores_parallel_v2(
     target_seqs = (rec.seq for rec in seqs1_rec)
 
     alignment_fn = functools.partial(
-        compute_alignment_scores_v2,
+        compute_alignment_scores,
         query_seqs=seqs2_rec,
         alignment_type=alignment_type,
         match_score=match_score,

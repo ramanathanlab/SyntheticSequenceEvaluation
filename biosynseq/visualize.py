@@ -592,11 +592,11 @@ def main() -> None:
         if args.align_plot_path is None:
             raise ValueError("align_plot_path is not specified.")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
-        dna_seqs = metrics.fasta_to_dna_seqs(fasta_path=args.fasta_path)
+        dna_seqs = metrics.get_seqs_from_fasta(fasta_path=args.fasta_path)
         embed = np.load(args.embed_path)
         dna_seqs = dna_seqs[: len(embed)]  # clip DNA sequence to embedding length
         protein_seqs = metrics.dna_to_protein_seqs(dna_seqs=dna_seqs)
-        protein_align_scores_matrix = metrics.alignment_scores_parallel_v2(
+        protein_align_scores_matrix = metrics.alignment_scores_parallel(
             seqs1_rec=protein_seqs,
             seqs2_rec=protein_seqs,
             alignment_type=args.alignment_type,
