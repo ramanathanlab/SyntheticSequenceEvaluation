@@ -35,7 +35,7 @@ def get_paint_df(fasta_path: Path, embed_path: Path) -> pd.DataFrame:
         molecular weight, and isolelectric point derived from each DNA sequence.
     """
     # get DNA sequences
-    dna_seqs = metrics.fasta_to_dna_seqs(fasta_path=fasta_path)
+    dna_seqs = metrics.get_seqs_from_fasta(fasta_path=fasta_path)
     # clip DNA sequences to embedding length
     embed = np.load(embed_path)
     dna_seqs = dna_seqs[: len(embed)]
@@ -408,7 +408,7 @@ def get_umap(
         }
 
 
-def plot_AlignScore_EmbedDist(
+def plot_embed_dist_vs_align_score(
     avg_scores_df: pd.DataFrame,
     save_path: Path,
     alignment_type: str = "global",
@@ -614,7 +614,7 @@ def main() -> None:
         avg_scores_df = metrics.get_avg_scores_df(
             scores_df=scores_df, alignment_type=args.alignment_type
         )
-        plot_AlignScore_EmbedDist(
+        plot_embed_dist_vs_align_score(
             avg_scores_df=avg_scores_df,
             save_path=args.align_plot_path,
             alignment_type=args.alignment_type,
