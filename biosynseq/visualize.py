@@ -233,25 +233,25 @@ def run_tsne(embed_data: np.ndarray) -> np.ndarray:
 #         }
 
 
-# def run_umap(embed_data: np.ndarray) -> np.ndarray:
-#     """Given 2-dimensional sequence embeddings, return the transformed data using UMAP.
+def run_umap(embed_data: np.ndarray) -> np.ndarray:
+    """Given 2-dimensional sequence embeddings, return the transformed data using UMAP.
 
-#     Parameters
-#     ----------
-#     embed_data : np.ndarray
-#         Sequence embeddings to be transformed by UMAP. Must be 2-dimensional.
+    Parameters
+    ----------
+    embed_data : np.ndarray
+        Sequence embeddings to be transformed by UMAP. Must be 2-dimensional.
 
-#     Returns
-#     -------
-#     np.ndarray
-#         Transformed embeddings after running UMAP.
-#     """
-#     from cuml.manifold import UMAP
+    Returns
+    -------
+    np.ndarray
+        Transformed embeddings after running UMAP.
+    """
+    from cuml.manifold import UMAP
 
-#     # embed_data must be 2D since rapidsai only supports 2D data
-#     model = UMAP(random_state=10)
-#     data_proj = model.fit_transform(embed_data)
-#     return data_proj
+    # embed_data must be 2D since rapidsai only supports 2D data
+    model = UMAP(random_state=10)
+    data_proj = model.fit_transform(embed_data)
+    return data_proj
 
 
 # def plot_umap(
@@ -560,10 +560,10 @@ def get_cluster(
 
     if get_subplots:
         return plot_cluster_subplots(
-            tsne_umap=tsne_umap,
             data_proj=data_cluster,
             paint_df=paint_df,
             cluster_path=cluster_path,
+            tsne_umap=tsne_umap,
         )
     else:
         return {
@@ -572,6 +572,7 @@ def get_cluster(
                 paint=paint_df[key].values,
                 paint_name=str(key),
                 cluster_path=cluster_path,
+                tsne_umap=tsne_umap,
             )
             for key in paint_df
         }

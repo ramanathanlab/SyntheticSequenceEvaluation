@@ -80,20 +80,20 @@ python3 generate.py --mode get_embeddings --config /homes/lind/MDH-pipeline/mdh_
 ```
 
 # Running visualize.py
-## Example 1: Running ```get_tsne```
+## Example 1: Get t-SNE plots
 ```
-python3 visualize.py --mode get_tsne --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --tsne_path /homes/lind/MDH-pipeline/visualize/
+python3 visualize.py --mode tsne --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --cluster_path /homes/lind/MDH-pipeline/visualize/
 ```
-## Example 2: Running ```get_umap```
+## Example 2: Get UMAP plots
 ```
-python3 visualize.py --mode get_umap --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --umap_path /homes/lind/MDH-pipeline/visualize/
+python3 visualize.py --mode umap --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --cluster_path /homes/lind/MDH-pipeline/visualize/
 ```
 ## Example 3: Running ```plot_AlignScore_EmbedDist```
 Generated sequence:
 ```
-python3 visualize.py --mode get_align_plot --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --align_plot_path /homes/lind/MDH-pipeline/visualize/ --alignment_type global --num_workers 70
+python3 visualize.py --mode align_plot --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --align_plot_path /homes/lind/MDH-pipeline/visualize/ --alignment_type global --num_workers 70
 ```
 Test sequence: 
 ```
-python3 visualize.py --mode get_align_plot --embed_path /homes/mzvyagin/MDH/perlmutter_data/inference-test-embeddings.npy --fasta_path /homes/mzvyagin/MDH/gene_transformer/gene_transformer/data/full_mdh_fasta/test.fasta --align_plot_path /homes/lind/MDH-pipeline/visualize/ --alignment_type global --num_workers 70
+python3 visualize.py --mode align_plot --embed_path /homes/mzvyagin/MDH/perlmutter_data/inference-test-embeddings.npy --fasta_path /homes/mzvyagin/MDH/gene_transformer/gene_transformer/data/full_mdh_fasta/test.fasta --align_plot_path /homes/lind/MDH-pipeline/visualize/ --alignment_type global --num_workers 70
 ```
