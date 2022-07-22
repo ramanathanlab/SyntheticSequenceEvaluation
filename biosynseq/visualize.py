@@ -74,165 +74,6 @@ def run_tsne(embed_data: np.ndarray) -> np.ndarray:
     return data_proj
 
 
-# def plot_tsne(
-#     data_proj: np.ndarray,
-#     paint: np.ndarray,
-#     paint_name: str,
-#     tsne_path: Path,
-#     cmap: str = "viridis",
-# ) -> pd.DataFrame:
-#     """Plot t-SNE visualizations for each sequence metric and
-#     save the plots as separate images to the specified directory.
-
-#     Parameters
-#     ----------
-#     data_proj : np.ndarray
-#         Transformed embeddings after running t-SNE.
-#     paint : np.ndarray
-#         Dataframe containing information of sequence metrics for each DNA sequence.
-#     paint_name : str
-#         Name of the sequence metric whose t-SNE visualization will be plotted.
-#     tsne_path : Path
-#         Path to save t-SNE plots. Must be a directory.
-#     cmap : str, optional
-#         Colormap to visualize, by default "viridis."
-
-#     Returns
-#     -------
-#     pd.DataFrame
-#         Dataframe with plotting values.
-
-#     Raises
-#     ------
-#     ValueError
-#         If the given tsne_path is not a directory.
-#     """
-#     df = pd.DataFrame(
-#         {
-#             "z0": data_proj[:, 0],
-#             "z1": data_proj[:, 1],
-#             paint_name: paint[: data_proj.shape[0]],
-#         }
-#     )
-#     ax = df.plot.scatter(x="z0", y="z1", c=paint_name, colormap=cmap, alpha=0.4)
-#     fig = ax.get_figure()
-#     fig.show()
-
-#     # save each tsne plot as a separate png image in the specified directory, tsne_path
-#     if tsne_path.is_dir():
-#         fig.savefig(tsne_path / (f"{paint_name}_tsne.png"), dpi=300)
-#     else:
-#         raise ValueError(f"{tsne_path} is not a directory!")
-#     return df
-
-
-# def plot_tsne_subplots(
-#     data_proj: np.ndarray,
-#     paint_df: pd.DataFrame,
-#     tsne_path: Path,
-#     cmap: str = "viridis",
-# ) -> Dict[str, pd.DataFrame]:
-#     """Plot t-SNE visualizations for each sequence metric as subplots and
-#     save the plots as a collective image with subplots in the specified directory.
-
-#     Parameters
-#     ----------
-#     data_proj : np.ndarray
-#         Transformed embeddings after running t-SNE.
-#     paint_df : pd.DataFrame
-#         Dataframe containing information of sequence metrics for each DNA sequence.
-#     tsne_path : Path
-#         Path to save the t-SNE plot. Must be a directory.
-#     cmap : str, optional
-#         Colormap to visualize, by default "viridis."
-
-#     Returns
-#     -------
-#     Dict[str, pd.DataFrame]
-#         Dataframes with plotting values.
-
-#     Raises
-#     ------
-#     ValueError
-#         If the given tsne_path is not a directory.
-#     """
-#     df_dict = {}
-#     nrows = 2
-#     ncols = 2
-#     plt.figure(figsize=(15, 12))
-
-#     for n, key in enumerate(paint_df):
-#         paint_name = key
-#         paint = paint_df[key].values
-
-#         # create new dataframe for the subplot
-#         df = pd.DataFrame(
-#             {
-#                 "z0": data_proj[:, 0],
-#                 "z1": data_proj[:, 1],
-#                 paint_name: paint[: data_proj.shape[0]],
-#             }
-#         )
-#         df_dict[key] = df
-
-#         # add subplot
-#         ax = plt.subplot(nrows, ncols, n + 1)
-#         df.plot.scatter(x="z0", y="z1", ax=ax, c=paint_name, colormap=cmap, alpha=0.4)
-#         fig = ax.get_figure()
-#         fig.show()
-#         plt.tight_layout()
-
-#     # save each tsne plot as a collective image with subplots in the specified directory, tsne_path
-#     if tsne_path.is_dir():
-#         fig.savefig(tsne_path / (f"SeqMetrics_tsne.png"), dpi=300)
-#     else:
-#         raise ValueError(f"{tsne_path} is not a directory!")
-#     return df_dict
-
-
-# def get_tsne(
-#     embed_data: np.ndarray,
-#     paint_df: pd.DataFrame,
-#     tsne_path: Path,
-#     get_subplots: bool = False,
-# ) -> Dict[str, pd.DataFrame]:
-#     """Given 2-dimensional sequence embeddings and sequence metrics dataframe,
-#     plot and save t-SNE visualizations to specified directory.
-
-#     Parameters
-#     ----------
-#     embed_data : np.ndarray
-#         Sequence embeddings to be transformed by t-SNE. Must be 2-dimensional.
-#     paint_df : pd.DataFrame
-#         Dataframe containing information of sequence metrics for each DNA sequence.
-#     tsne_path : Path
-#         Path to save t-SNE plots. Must be a directory.
-#     get_subplots : bool, optional
-#         True: save t-SNE plots as a collective image with subplots;
-#         False: save t-SNE plots as separate images.
-
-#     Returns
-#     -------
-#     Dict[str, pd.DataFrame]
-#         Dataframes with plotting values.
-#     """
-#     data_tsne = run_tsne(embed_data=embed_data)
-#     if get_subplots:
-#         return plot_tsne_subplots(
-#             data_proj=data_tsne, paint_df=paint_df, tsne_path=tsne_path
-#         )
-#     else:
-#         return {
-#             str(key): plot_tsne(
-#                 data_proj=data_tsne,
-#                 paint=paint_df[key].values,
-#                 paint_name=str(key),
-#                 tsne_path=tsne_path,
-#             )
-#             for key in paint_df
-#         }
-
-
 def run_umap(embed_data: np.ndarray) -> np.ndarray:
     """Given 2-dimensional sequence embeddings, return the transformed data using UMAP.
 
@@ -252,160 +93,6 @@ def run_umap(embed_data: np.ndarray) -> np.ndarray:
     model = UMAP(random_state=10)
     data_proj = model.fit_transform(embed_data)
     return data_proj
-
-
-# def plot_umap(
-#     data_proj: np.ndarray,
-#     paint: np.ndarray,
-#     paint_name: str,
-#     umap_path: Path,
-#     cmap: str = "plasma",
-# ) -> pd.DataFrame:
-#     """Plot UMAP visualizations for each sequence metric and
-#     save the plots as separate images to the specified directory.
-
-#     Parameters
-#     ----------
-#     data_proj : np.ndarray
-#         Transformed embeddings after running UMAP.
-#     paint : np.ndarray
-#         Dataframe containing information of sequence metrics for each DNA sequence.
-#     paint_name : str
-#         Name of the sequence metric whose UMAP visualization will be plotted.
-#     umap_path : Path
-#         Path to save UMAP plots. Must be a directory.
-#     cmap : str, optional
-#         Colormap to visualize, by default "plasma"
-
-#     Returns
-#     -------
-#     pd.DataFrame
-#         Dataframe with plotting values.
-
-#     Raises
-#     ------
-#     ValueError
-#         If the given umap_path is not a directory.
-#     """
-#     df = pd.DataFrame(
-#         {
-#             "z0": data_proj[:, 0],
-#             "z1": data_proj[:, 1],
-#             paint_name: paint[: data_proj.shape[0]],
-#         }
-#     )
-#     ax = df.plot.scatter(x="z0", y="z1", c=paint_name, colormap=cmap, alpha=0.4)
-#     fig = ax.get_figure()
-#     fig.show()
-
-#     # save each umap plot as a separate png image in the specified directory, umap_path
-#     if umap_path.is_dir():
-#         fig.savefig(umap_path / (f"{paint_name}_umap.png"), dpi=300)
-#     else:
-#         raise ValueError(f"{umap_path} is not a directory!")
-#     return df
-
-
-# def plot_umap_subplots(
-#     data_proj: np.ndarray, paint_df: pd.DataFrame, umap_path: Path, cmap: str = "plasma"
-# ) -> Dict[str, pd.DataFrame]:
-#     """Plot UMAP visualizations for each sequence metric as subplots and
-#     save the plots as a collective image with subplots in the specified directory.
-
-#     Parameters
-#     ----------
-#     data_proj : np.ndarray
-#         Transformed embeddings after running UMAP.
-#     paint_df : pd.DataFrame
-#         Dataframe containing information of sequence metrics for each DNA sequence.
-#     tsne_path : Path
-#         Path to save the UMAP plot. Must be a directory.
-#     cmap : str, optional
-#         Colormap to visualize, by default "plasma."
-
-#     Returns
-#     -------
-#     Dict[str, pd.DataFrame]
-#         Dataframes with plotting values.
-
-#     Raises
-#     ------
-#     ValueError
-#         If the given umap_path is not a directory.
-#     """
-#     df_dict = {}
-#     nrows = 2
-#     ncols = 2
-#     plt.figure(figsize=(15, 12))
-
-#     for n, key in enumerate(paint_df):
-#         paint_name = key
-#         paint = paint_df[key].values
-#         df = pd.DataFrame(
-#             {
-#                 "z0": data_proj[:, 0],
-#                 "z1": data_proj[:, 1],
-#                 paint_name: paint[: data_proj.shape[0]],
-#             }
-#         )
-#         df_dict[key] = df
-
-#         # add subplot
-#         ax = plt.subplot(nrows, ncols, n + 1)
-#         df.plot.scatter(x="z0", y="z1", ax=ax, c=paint_name, colormap=cmap, alpha=0.4)
-#         fig = ax.get_figure()
-#         fig.show()
-#         plt.tight_layout()
-
-#     # save each umap plot as a collective image with subplots in the specified directory, umap_path
-#     if umap_path.is_dir():
-#         fig.savefig(umap_path / (f"SeqMetrics_umap.png"), dpi=300)
-#     else:
-#         raise ValueError(f"{umap_path} is not a directory!")
-#     return df_dict
-
-
-# def get_umap(
-#     embed_data: np.ndarray,
-#     paint_df: pd.DataFrame,
-#     umap_path: Path,
-#     get_subplots: bool = False,
-# ) -> Dict[str, pd.DataFrame]:
-#     """Given 2-dimensional sequence embeddings and sequence metrics dataframe,
-#     plot and save UMAP visualizations to specified directory.
-
-#     Parameters
-#     ----------
-#     embed_data : np.ndarray
-#         Sequence embeddings to be transformed by UMAP. Must be 2-dimensional.
-#     paint_df : pd.DataFrame
-#         Dataframe containing information of sequence metrics for each DNA sequence.
-#     umap_path : Path
-#         Path to save UMAP plots. Must be a directory.
-#     get_subplots : bool, optional
-#         True: save UMAP plots as a collective image with subplots;
-#         False: save UMAP plots as separate images.
-
-#     Returns
-#     -------
-#     Dict[str, pd.DataFrame]
-#         Dataframes with plotting values.
-#     """
-#     data_umap = run_umap(embed_data=embed_data)
-#     if get_subplots:
-#         return plot_umap_subplots(
-#             data_proj=data_umap, paint_df=paint_df, umap_path=umap_path
-#         )
-#     else:
-#         return {
-#             str(key): plot_umap(
-#                 data_proj=data_umap,
-#                 paint=paint_df[key].values,
-#                 paint_name=str(key),
-#                 umap_path=umap_path,
-#             )
-#             for key in paint_df
-#         }
 
 
 def plot_cluster(
@@ -429,6 +116,8 @@ def plot_cluster(
         Name of the sequence metric whose t-SNE or UMAP visualization will be plotted.
     cluster_path : Path
         Path to save plots. Must be a directory.
+    tsne_umap : str
+        "tsne" or "umap" to specify the type of cluster plot, by default "umap."
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
@@ -479,6 +168,8 @@ def plot_cluster_subplots(
         Dataframe containing information of sequence metrics for each DNA sequence.
     cluster_path : Path
         Path to save plots. Must be a directory.
+    tsne_umap : str
+        "tsne" or "umap" to specify the type of cluster plot, by default "umap."
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
@@ -544,6 +235,8 @@ def get_cluster(
         Dataframe containing information of sequence metrics for each DNA sequence.
     cluster_path : Path
         Path to save plots. Must be a directory.
+    tsne_umap : str
+        "tsne" or "umap" to specify the type of cluster plot, by default "umap."
     get_subplots : bool, optional
         True: save plots as a collective image with subplots;
         False: save plots as separate images.
@@ -640,7 +333,7 @@ def plot_embed_dist_vs_align_score(
     plt.legend()
 
     if save_path.is_dir():
-        plt.savefig(save_path / ("AlignScore_EmbedDist.png"), dpi=300)
+        plt.savefig(save_path / ("Embed_dist_vs_align_score.png"), dpi=300)
     else:
         raise ValueError(f"{save_path} is not a directory!")
 
@@ -676,16 +369,6 @@ def parse_args() -> Namespace:
         type=Path,
         help="Path to save t-SNE or UMAP plots. Must lead to a directory, not a file.",
     )
-    # parser.add_argument(
-    #     "--tsne_path",
-    #     type=Path,
-    #     help="Path to save t-SNE plots. Must lead to a directory, not a file.",
-    # )
-    # parser.add_argument(
-    #     "--umap_path",
-    #     type=Path,
-    #     help="Path to save UMAP plots. Must lead to a directory, not a file.",
-    # )
     parser.add_argument(
         "--get_subplots",
         type=bool,
@@ -752,32 +435,6 @@ def main() -> None:
             get_subplots=args.get_subplots,
         )
         print(f"Cluster plots have been saved to {args.cluster_path}.")
-
-    # if args.mode == "get_tsne":
-    #     if args.tsne_path is None:
-    #         raise ValueError("tsne_path is not specified.")
-    #     embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
-    #     paint_df = get_paint_df(fasta_path=args.fasta_path, embed_path=args.embed_path)
-    #     get_tsne(
-    #         embed_data=embed_avg,
-    #         paint_df=paint_df,
-    #         tsne_path=args.tsne_path,
-    #         get_subplots=args.get_subplots,
-    #     )
-    #     print(f"t-SNE plots have been saved to {args.tsne_path}.")
-    # elif args.mode == "get_umap":
-    #     if args.umap_path is None:
-    #         raise ValueError("umap_path is not specified.")
-    #     embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
-    #     paint_df = get_paint_df(fasta_path=args.fasta_path, embed_path=args.embed_path)
-    #     get_umap(
-    #         embed_data=embed_avg,
-    #         paint_df=paint_df,
-    #         umap_path=args.umap_path,
-    #         get_subplots=args.get_subplots,
-    #     )
-    #     print(f"UMAP plots have been saved to {args.umap_path}.")
-
     elif args.mode == "align_plot":
         if args.align_plot_path is None:
             raise ValueError("align_plot_path is not specified.")
@@ -811,7 +468,7 @@ def main() -> None:
             plot_title=args.align_plot_title,
         )
         print(
-            f"AlignScore vs. EmbedDist Plot has been saved to {args.align_plot_path}."
+            f"Embed dist vs. align score plot has been saved to {args.align_plot_path}."
         )
     else:
         raise ValueError(f"Invalid mode: {args.mode}")
