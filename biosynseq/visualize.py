@@ -739,7 +739,7 @@ def parse_args() -> Namespace:
 
 
 def main() -> None:
-    if args.mode == ("tsne" or "umap"):
+    if (args.mode == "tsne") or (args.mode == "umap"):
         if args.cluster_path is None:
             raise ValueError("cluster_path is not specified.")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
@@ -777,6 +777,7 @@ def main() -> None:
     #         get_subplots=args.get_subplots,
     #     )
     #     print(f"UMAP plots have been saved to {args.umap_path}.")
+
     elif args.mode == "get_align_plot":
         if args.align_plot_path is None:
             raise ValueError("align_plot_path is not specified.")
