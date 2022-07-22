@@ -1,14 +1,12 @@
 """Visualize synthetic sequences using t-SNE, UMAP, and other visualization schemes."""
 import logging
 from argparse import ArgumentParser, Namespace
-from ctypes import alignment
 from pathlib import Path
 from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from Bio import SeqIO
 
 from biosynseq import metrics
 
