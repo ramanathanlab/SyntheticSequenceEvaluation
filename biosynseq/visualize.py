@@ -778,7 +778,7 @@ def main() -> None:
     #     )
     #     print(f"UMAP plots have been saved to {args.umap_path}.")
 
-    elif args.mode == "get_align_plot":
+    elif args.mode == "align_plot":
         if args.align_plot_path is None:
             raise ValueError("align_plot_path is not specified.")
         embed_avg = metrics.get_embed_avg(embed_path=args.embed_path)
