@@ -57,7 +57,7 @@ def get_seqs_from_fasta(
 
 
 def dna_to_protein_seqs(dna_seqs: List[SeqRecord]) -> List[SeqRecord]:
-    """Translate DNA sequenecs to protein sequences.
+    """Translate DNA sequences to protein sequences.
     Stop translation at the first in-frame stop codon
 
     Parameters
@@ -70,8 +70,7 @@ def dna_to_protein_seqs(dna_seqs: List[SeqRecord]) -> List[SeqRecord]:
     List[SeqRecord]
         List of protein sequences.
     """
-    protein_seqs = [seq.translate(to_stop=True) for seq in dna_seqs]
-    return protein_seqs
+    return [seq.translate(to_stop=True) for seq in dna_seqs]
 
 
 def gc_content(seqs: List[SeqRecord]) -> List[float]:
