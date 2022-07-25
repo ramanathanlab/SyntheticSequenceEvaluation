@@ -72,7 +72,7 @@ def run_tsne(embed_data: np.ndarray) -> np.ndarray:
     return data_proj
 
 
-def run_umap(embed_data: np.ndarray) -> np.ndarray:
+def run_umap(embed_data: np.ndarray, random_state: int = 10) -> np.ndarray:
     """Given 2-dimensional sequence embeddings, return the transformed data using UMAP.
 
     Parameters
@@ -88,7 +88,7 @@ def run_umap(embed_data: np.ndarray) -> np.ndarray:
     from cuml.manifold import UMAP
 
     # embed_data must be 2D since rapidsai only supports 2D data
-    model = UMAP(random_state=10)
+    model = UMAP(random_state=random_state)
     data_proj = model.fit_transform(embed_data)
     return data_proj
 
@@ -221,6 +221,7 @@ def get_cluster(
     cluster_path: Path,
     tsne_umap: str = "umap",
     get_subplots: bool = False,
+    umap_random_state: int = 10,
 ) -> Dict[str, pd.DataFrame]:
     """Given 2-dimensional sequence embeddings and sequence metrics dataframe,
     plot and save t-SNE or UMAP visualizations to specified directory.
@@ -247,7 +248,7 @@ def get_cluster(
     if tsne_umap == "tsne":
         data_cluster = run_tsne(embed_data=embed_data)
     else:
-        data_cluster = run_umap(embed_data=embed_data)
+        data_cluster = run_umap(embed_data=embed_data, random_state=umap_random_state)
 
     if get_subplots:
         return plot_cluster_subplots(
@@ -373,6 +374,9 @@ def parse_args() -> Namespace:
         help="True: save t-SNE or UMAP plots as a collective image with subplots; False: save t-SNE or UMAP plots as separate images.",
     )
     parser.add_argument(
+        "--umap_random_state", default=10, type=int, help="Random state to run UMAP.",
+    )
+    parser.add_argument(
         "--align_plot_path",
         type=Path,
         help="Path to save the Alignment Score vs. Embedding Distance plot. Must be a directory.",
@@ -431,6 +435,7 @@ def main() -> None:
             cluster_path=args.cluster_path,
             tsne_umap=args.mode,
             get_subplots=args.get_subplots,
+            umap_random_state=args.umap_random_state,
         )
         print(f"Cluster plots have been saved to {args.cluster_path}.")
     elif args.mode == "align_plot":
