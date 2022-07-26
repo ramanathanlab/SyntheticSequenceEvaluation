@@ -72,13 +72,36 @@ def run_tsne(embed_data: np.ndarray) -> np.ndarray:
     return data_proj
 
 
-def run_umap(embed_data: np.ndarray, random_state: int = 10) -> np.ndarray:
+def run_umap(
+    embed_data: np.ndarray,
+    n_neighbors: int = 15,
+    min_dist: float = 0.1,
+    spread: float = 1.0,
+    random_state: int = 10,
+) -> np.ndarray:
     """Given 2-dimensional sequence embeddings, return the transformed data using UMAP.
 
     Parameters
     ----------
     embed_data : np.ndarray
         Sequence embeddings to be transformed by UMAP. Must be 2-dimensional.
+    n_neighbors : int
+        The size of local neighborhood (in terms of number of neighboring sample points)
+        used for manifold approximation. Larger values result in more global views of the
+        manifold, while smaller values result in more local data being preserved.
+        In general values should be in the range 2 to 100.
+    min_dist : float
+        The effective minimum distance between embedded points. Smaller values will result
+        in a more clustered/clumped embedding where nearby points on the manifold are drawn
+        closer together, while larger values will result on a more even dispersal of points.
+        The value should be set relative to the spread value, which determines the scale at
+        which embedded points will be spread out.
+    spread : float
+        The effective scale of embedded points. In combination with min_dist this determines
+        how clustered/clumped the embedded points are.
+    random_state : int
+        The seed used by the random number generator during embedding initialization and
+        during sampling used by the optimizer.
 
     Returns
     -------
@@ -88,7 +111,12 @@ def run_umap(embed_data: np.ndarray, random_state: int = 10) -> np.ndarray:
     from cuml.manifold import UMAP
 
     # embed_data must be 2D since rapidsai only supports 2D data
-    model = UMAP(random_state=random_state)
+    model = UMAP(
+        n_neighbors=n_neighbors,
+        min_dist=min_dist,
+        spread=spread,
+        random_state=random_state,
+    )
     data_proj = model.fit_transform(embed_data)
     return data_proj
 
@@ -221,6 +249,9 @@ def get_cluster(
     cluster_path: Path,
     tsne_umap: str = "umap",
     get_subplots: bool = False,
+    umap_n_neighbors: int = 15,
+    umap_min_dist: float = 0.1,
+    umap_spread: float = 1.0,
     umap_random_state: int = 10,
 ) -> Dict[str, pd.DataFrame]:
     """Given 2-dimensional sequence embeddings and sequence metrics dataframe,
@@ -239,6 +270,23 @@ def get_cluster(
     get_subplots : bool, optional
         True: save plots as a collective image with subplots;
         False: save plots as separate images.
+    n_neighbors : int
+        The size of local neighborhood (in terms of number of neighboring sample points)
+        used for manifold approximation. Larger values result in more global views of the
+        manifold, while smaller values result in more local data being preserved.
+        In general values should be in the range 2 to 100.
+    min_dist : float
+        The effective minimum distance between embedded points. Smaller values will result
+        in a more clustered/clumped embedding where nearby points on the manifold are drawn
+        closer together, while larger values will result on a more even dispersal of points.
+        The value should be set relative to the spread value, which determines the scale at
+        which embedded points will be spread out.
+    spread : float
+        The effective scale of embedded points. In combination with min_dist this determines
+        how clustered/clumped the embedded points are.
+    random_state : int
+        The seed used by the random number generator during embedding initialization and
+        during sampling used by the optimizer.
 
     Returns
     -------
@@ -248,7 +296,13 @@ def get_cluster(
     if tsne_umap == "tsne":
         data_cluster = run_tsne(embed_data=embed_data)
     else:
-        data_cluster = run_umap(embed_data=embed_data, random_state=umap_random_state)
+        data_cluster = run_umap(
+            embed_data=embed_data,
+            n_neighbors=umap_n_neighbors,
+            min_dist=umap_min_dist,
+            spread=umap_spread,
+            random_state=umap_random_state,
+        )
 
     if get_subplots:
         return plot_cluster_subplots(
@@ -374,7 +428,28 @@ def parse_args() -> Namespace:
         help="True: save t-SNE or UMAP plots as a collective image with subplots; False: save t-SNE or UMAP plots as separate images.",
     )
     parser.add_argument(
-        "--umap_random_state", default=10, type=int, help="Random state to run UMAP.",
+        "--umap_n_neighbors",
+        default=15,
+        type=int,
+        help="Size of local neighborhood (in terms of the number of neighboring sample points) to run UMAP.",
+    )
+    parser.add_argument(
+        "--umap_min_dist",
+        default=0.1,
+        type=float,
+        help="Effective minimum distance between embedded points to run UMAP.",
+    )
+    parser.add_argument(
+        "--umap_spread",
+        default=1.0,
+        type=float,
+        help="Effective scale of embedded points to run UMAP.",
+    )
+    parser.add_argument(
+        "--umap_random_state",
+        default=10,
+        type=int,
+        help="Seed used by the random number generator during embedding initialization and during sampling used by the optimizer to run UMAP.",
     )
     parser.add_argument(
         "--align_plot_path",
@@ -435,6 +510,9 @@ def main() -> None:
             cluster_path=args.cluster_path,
             tsne_umap=args.mode,
             get_subplots=args.get_subplots,
+            umap_n_neighbors=args.umap_n_neighbors,
+            umap_min_dist=args.umap_min_dist,
+            umap_spread=args.umap_spread,
             umap_random_state=args.umap_random_state,
         )
         print(f"Cluster plots have been saved to {args.cluster_path}.")
