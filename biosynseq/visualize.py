@@ -401,7 +401,7 @@ def parse_args() -> Namespace:
     Namespace
         Parsed arguments.
     """
-    parser = ArgumentParser(description="Generate sequences or embeddings.")
+    parser = ArgumentParser(description="Visualize synthetic sequences.")
     parser.add_argument(
         "--mode",
         type=str,
@@ -499,6 +499,24 @@ def parse_args() -> Namespace:
 
 
 def main() -> None:
+    """Visualize synthetic sequences.
+
+    Parameters
+    ----------
+    args : Namespace
+        Parsed arguments.
+
+    Raises
+    ------
+    ValueError
+        If user wanted to generate t-SNE or UMAP plots but did not specify the path
+        to save these plots.
+    ValueError
+        If user wanted to generate an embed dist vs. align score plot but did not
+        specify the path to save the plot.
+    ValueError
+        If mode is invalid.
+    """
     if (args.mode == "tsne") or (args.mode == "umap"):
         if args.cluster_path is None:
             raise ValueError("cluster_path is not specified.")

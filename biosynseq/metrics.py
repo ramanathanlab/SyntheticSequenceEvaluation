@@ -358,10 +358,7 @@ def get_scores_df(
     embed_dist_upper = get_embed_dist_flatten(embed_avg=embed_avg)
     scores_upper = get_scores_flatten(scores_matrix=scores_matrix)
     scores_df = pd.DataFrame(
-        {
-            "Embedding L2 Distance": embed_dist_upper,
-            align_key: scores_upper,
-        }
+        {"Embedding L2 Distance": embed_dist_upper, align_key: scores_upper,}
     )
     return scores_df
 
