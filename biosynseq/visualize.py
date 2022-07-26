@@ -294,9 +294,9 @@ def get_cluster(
         Dataframes with plotting values.
     """
     if tsne_umap == "tsne":
-        data_cluster = run_tsne(embed_data=embed_data)
+        data_proj = run_tsne(embed_data=embed_data)
     else:
-        data_cluster = run_umap(
+        data_proj = run_umap(
             embed_data=embed_data,
             n_neighbors=umap_n_neighbors,
             min_dist=umap_min_dist,
@@ -306,7 +306,7 @@ def get_cluster(
 
     if get_subplots:
         return plot_cluster_subplots(
-            data_proj=data_cluster,
+            data_proj=data_proj,
             paint_df=paint_df,
             cluster_path=cluster_path,
             tsne_umap=tsne_umap,
@@ -314,7 +314,7 @@ def get_cluster(
     else:
         return {
             str(key): plot_cluster(
-                data_proj=data_cluster,
+                data_proj=data_proj,
                 paint=paint_df[key].values,
                 paint_name=str(key),
                 cluster_path=cluster_path,
