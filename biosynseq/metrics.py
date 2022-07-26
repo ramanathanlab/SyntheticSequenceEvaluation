@@ -105,7 +105,9 @@ def seq_length(seqs: List[SeqRecord]) -> List[float]:
     return [len(rec.seq) for rec in seqs]
 
 
-def molecular_weight(protein_seqs: List[SeqRecord]) -> List[float]:
+def molecular_weight(
+    protein_seqs: List[SeqRecord], print_rec: bool = False
+) -> List[float]:
     """Given a list of protein sequences, return each protein's molecular weight.
 
     Parameters
@@ -122,8 +124,9 @@ def molecular_weight(protein_seqs: List[SeqRecord]) -> List[float]:
 
     mol_weight_list = []
     for rec in protein_seqs:
-        print(rec)
-        print(str(rec.seq))
+        if print_rec:
+            print(rec)
+            print(str(rec.seq))
         mol_weight = SeqUtils.molecular_weight(rec.seq, "protein")
         mol_weight_list.append(mol_weight)
     return mol_weight_list
@@ -146,8 +149,8 @@ def isoelectric_point(protein_seqs: List[SeqRecord]) -> List[float]:
 
     isoelectric_point_list = []
     for rec in protein_seqs:
-        print(rec)
-        print(str(rec.seq))
+        # print(rec)
+        # print(str(rec.seq))
         isoelectric_point = IsoelectricPoint(rec).pi()
         isoelectric_point_list.append(isoelectric_point)
     return isoelectric_point_list
