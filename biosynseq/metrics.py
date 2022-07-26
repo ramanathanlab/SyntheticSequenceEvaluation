@@ -123,6 +123,7 @@ def molecular_weight(protein_seqs: List[SeqRecord]) -> List[float]:
     mol_weight_list = []
     for rec in protein_seqs:
         print(rec)
+        print(str(rec.seq))
         mol_weight = SeqUtils.molecular_weight(rec.seq, "protein")
         mol_weight_list.append(mol_weight)
     return mol_weight_list
@@ -146,6 +147,7 @@ def isoelectric_point(protein_seqs: List[SeqRecord]) -> List[float]:
     isoelectric_point_list = []
     for rec in protein_seqs:
         print(rec)
+        print(str(rec.seq))
         isoelectric_point = IsoelectricPoint(rec).pi()
         isoelectric_point_list.append(isoelectric_point)
     return isoelectric_point_list
@@ -353,7 +355,10 @@ def get_scores_df(
     embed_dist_upper = get_embed_dist_flatten(embed_avg=embed_avg)
     scores_upper = get_scores_flatten(scores_matrix=scores_matrix)
     scores_df = pd.DataFrame(
-        {"Embedding L2 Distance": embed_dist_upper, align_key: scores_upper,}
+        {
+            "Embedding L2 Distance": embed_dist_upper,
+            align_key: scores_upper,
+        }
     )
     return scores_df
 
