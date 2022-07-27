@@ -53,6 +53,7 @@ Then run:
 alphafold_env
 mkdir examplerun
 cd examplerun
+cp -r /opt/alphafold/* .
 vim test_seq.fasta # this is where you paste in the protein sequence whose 3D structure you would like AlphaFold to predict. 
 ./run.sh -d /lambda_stor/data/hsyoo/AlphaFoldData  -o test_out -f test_seq.fasta \
  -t 2020-05-01 -p casp14 -m model_1,model_2,model_3,model_4,model_5 \
