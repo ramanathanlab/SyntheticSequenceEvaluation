@@ -59,7 +59,7 @@ vim test_seq.fasta # this is where you paste in the protein sequence whose 3D st
  -t 2020-05-01 -p casp14 -m model_1,model_2,model_3,model_4,model_5 \
 -a 0
 ```
-In the last command, ```-a``` indicates the GPU to use. In this case, we are using the 0th GPU. 
+In the last command, ```-a``` indicates the GPU to use. In this case, we are using the 0th GPU. You can use the command ```nvidia-smi``` to check which GPUs are available in this Lambda node.
 
 Now, AlphaFold should start to run. This may take an hour. 
 
