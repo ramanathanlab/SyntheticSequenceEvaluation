@@ -41,9 +41,9 @@ i
 ```
 ## If running AlphaFold with lambda_fold.py
 ```
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 python ../MDH/gene_transformer/examples/folding/lambda_fold.py -i synthetic_seqeunces_last_cluster -o seventh_cluster
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 python /homes/lind/gene_transformer/examples/folding/lambda_fold.py -i /homes/lind/examplerun/alphafold_fasta -o /homes/lind/MDH-pipeline/run_alphafold/alphafold_results
 ```
-
+Note that ```-i``` should lead to a directory that contains fasta files, not to the fasta file itself, and ```-o``` should lead to an empty directory.
 ## If running AlphaFold without using lambda_fold.py
 ```
 alias alphafold_container='/software/singularity/bin/singularity exec --nv -B /lambda_stor/ /lambda_stor/data/hsyoo/AlphaFoldImage/alphafold.sif bash'
