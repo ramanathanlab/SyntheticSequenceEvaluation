@@ -325,7 +325,7 @@ def get_cluster(
 
 
 def plot_metrics_hist(
-    paint_dfs: List[pd.DataFrame], labels: List[str], save_path: Path = ""
+    paint_dfs: List[pd.DataFrame], labels: List[str], save_path: Path = Path("")
 ) -> str:
     """Plot the sequence metrics histograms across generated, test, validation, and/or
     training sequences, with each subplot representing a metric, and save the plot to the
