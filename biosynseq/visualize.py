@@ -337,7 +337,7 @@ def plot_metrics_hist(
         List of painted dataframes containing the paint_df for each type of sequences.
     labels : List[str]
         List of labels containing the names of the type of sequences, in the order that these
-        sequences are arranged in paint_dfs.
+        sequence types are arranged in paint_dfs.
     save_path : Path
         Path to save the metrics histograms.
 
