@@ -2,7 +2,7 @@
 import logging
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -322,6 +322,52 @@ def get_cluster(
             )
             for key in paint_df
         }
+
+
+def plot_metrics_hist(
+    paint_dfs: List[pd.DataFrame], labels: List[str], save_path: Path = ""
+) -> str:
+    """Plot the sequence metrics histograms across generated, test, validation, and/or
+    training sequences, with each subplot representing a metric, and save the plot to the
+    specified directory.
+
+    Parameters
+    ----------
+    paint_dfs : List[pd.DataFrame]
+        List of painted dataframes containing the paint_df for each type of sequences.
+    labels : List[str]
+        List of labels containing the names of the type of sequences, in the order that these
+        sequences are arranged in paint_dfs.
+    save_path : Path
+        Path to save the metrics histograms.
+
+    Returns
+    -------
+    str
+        Statement indicating that plot saving has been complete.
+
+    Raises
+    ------
+    ValueError
+        If the path to save the plot is not a directory.
+    """
+    ncols = 2
+    nrows = round(len(paint_dfs) / 2)
+    plt.figure(figsize=(15, 12))  # width, height
+
+    for n, key in enumerate(paint_dfs[0]):
+        plt.subplot(nrows, ncols, n + 1)
+        for i in range(len(paint_dfs)):
+            plt.hist(paint_dfs[i][key], alpha=0.5, label=labels[i], log=True)
+        plt.legend(loc="upper left")
+        plt.title(key)
+
+    if save_path.is_dir():
+        plt.savefig(save_path / ("metrics_hist.png"), dpi=300)
+    else:
+        raise ValueError(f"{save_path} is not a directory!")
+
+    return f"Metrics histograms have been saved to {save_path}."
 
 
 def plot_embed_dist_vs_align_score(
