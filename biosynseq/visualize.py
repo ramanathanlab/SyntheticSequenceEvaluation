@@ -352,7 +352,7 @@ def plot_metrics_hist(
         If the path to save the plot is not a directory.
     """
     ncols = 2
-    nrows = round(len(paint_dfs) / 2)
+    nrows = np.ceil(len(paint_dfs) / 2)
     plt.figure(figsize=(15, 12))  # width, height
 
     for n, key in enumerate(paint_dfs[0]):
