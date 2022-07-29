@@ -39,7 +39,12 @@ First log in to Lambda. Then add the following to .bashrc by:
 vim ~/.bashrc
 i
 ```
-
+## If running AlphaFold with lambda_fold.py
+```
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6 python /homes/lind/gene_transformer/examples/folding/lambda_fold.py -i /homes/lind/examplerun/alphafold_fasta -o /homes/lind/MDH-pipeline/run_alphafold/alphafold_results
+```
+Note that ```-i``` should lead to a directory that contains fasta files, not to the fasta file itself, and ```-o``` should lead to an empty directory.
+## If running AlphaFold without using lambda_fold.py
 ```
 alias alphafold_container='/software/singularity/bin/singularity exec --nv -B /lambda_stor/ /lambda_stor/data/hsyoo/AlphaFoldImage/alphafold.sif bash'
 alias alphafold_env='source /opt/miniconda3/etc/profile.d/conda.sh; conda activate alphafold'
@@ -53,12 +58,16 @@ Then run:
 alphafold_env
 mkdir examplerun
 cd examplerun
+cp -r /opt/alphafold/* .
 vim test_seq.fasta # this is where you paste in the protein sequence whose 3D structure you would like AlphaFold to predict. 
+```
+
+```
 ./run.sh -d /lambda_stor/data/hsyoo/AlphaFoldData  -o test_out -f test_seq.fasta \
  -t 2020-05-01 -p casp14 -m model_1,model_2,model_3,model_4,model_5 \
 -a 0
 ```
-In the last command, ```-a``` indicates the GPU to use. In this case, we are using the 0th GPU. 
+In the last command, ```-a``` indicates the GPU to use. In this case, we are using the 0th GPU. You can use the command ```nvidia-smi``` to check which GPUs are available in this Lambda node.
 
 Now, AlphaFold should start to run. This may take an hour. 
 
