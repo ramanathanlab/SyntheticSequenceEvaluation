@@ -17,7 +17,7 @@ from gene_transformer.model import (
 )
 from gene_transformer.utils import non_redundant_generation, seqs_to_fasta
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("biosynseq.generate")
 
 
 def generate_fasta(
