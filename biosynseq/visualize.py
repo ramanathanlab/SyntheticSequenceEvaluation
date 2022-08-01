@@ -353,14 +353,6 @@ def plot_metrics_hist(
     """
     ncols = 2
     nrows = int(np.ceil(len(paint_dfs[0].columns) / 2))
-    print(len(paint_dfs[0].columns))
-    print(f"ncols: {ncols}")
-    print(f"nrows: {nrows}")
-
-    # key_list = []
-    # key_list.append(key for key in paint_dfs[0])
-    # print(key_list)
-    # print(len(key_list))
     plt.figure(figsize=(15, 12))  # width, height
 
     for n, key in enumerate(paint_dfs[0]):
@@ -375,7 +367,7 @@ def plot_metrics_hist(
     else:
         raise ValueError(f"{save_path} is not a directory!")
 
-    return f"Metrics histograms have been saved to {save_path}."
+    return f"Metrics histogram plot has been saved to {save_path}."
 
 
 def plot_embed_dist_vs_align_score(
