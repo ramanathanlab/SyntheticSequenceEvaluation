@@ -139,7 +139,7 @@ def isoelectric_point(protein_seqs: List[SeqRecord]) -> List[float]:
 
 def compute_alignment_scores(
     target_seq: Seq,
-    query_seqs: List[Seq],
+    query_seqs: List[SeqRecord],
     alignment_type: str = "global",
     match_score: float = 1.0,
     mismatch_score: float = 0.0,
@@ -157,7 +157,7 @@ def compute_alignment_scores(
     ----------
     target_seq : Seq
         Sequence to align against.
-    query_seqs : List[Seq]
+    query_seqs : List[SeqRecord]
         Sequences to align.
     alignment_type : str, optional
         "global" or "local", by default "global."
