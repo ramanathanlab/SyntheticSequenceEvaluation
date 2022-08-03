@@ -126,31 +126,30 @@ def plot_cluster(
     paint: np.ndarray,
     paint_name: str,
     save_dir: Path,
-    tsne_umap: str = "umap",
+    file_name_ending: str = "",
     cmap: str = "plasma",
 ) -> pd.DataFrame:
-    """Plot t-SNE or UMAP visualizations for each sequence metric and
-    save the plots as separate images to the specified directory.
+    """Plot a scatter plot and save it as a png image to the specified directory, save_dir.
 
     Parameters
     ----------
     data_proj : np.ndarray
-        Transformed embeddings after running t-SNE or UMAP.
+        Coordinates of the scatter points to be plotted.
     paint : np.ndarray
-        Dataframe containing information of sequence metrics for each DNA sequence.
+        Values of each scatter point.
     paint_name : str
-        Name of the sequence metric whose t-SNE or UMAP visualization will be plotted.
+        Name of the scatter plot.
     save_dir : Path
         Path to save plots. Must be a directory.
-    tsne_umap : str
-        "tsne" or "umap" to specify the type of cluster plot, by default "umap."
+    file_name_ending : str
+        Ending of the file name to specify the type of plot.
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
     Returns
     -------
     pd.DataFrame
-        Dataframe with plotting values.
+        Dataframe with plotting coordinates and plotting values.
 
     Raises
     ------
@@ -172,7 +171,7 @@ def plot_cluster(
     fig.show()
 
     # save each plot as a separate png image in the specified directory, save_dir
-    fig.savefig(save_dir / f"{paint_name}_{tsne_umap}.png", dpi=300)
+    fig.savefig(save_dir / f"{paint_name}_{file_name_ending}.png", dpi=300)
     return df
 
 
@@ -180,29 +179,30 @@ def plot_cluster_subplots(
     data_proj: np.ndarray,
     paint_df: pd.DataFrame,
     save_dir: Path,
-    tsne_umap: str = "umap",
+    file_name_ending: str = "",
     cmap: str = "plasma",
 ) -> Dict[str, pd.DataFrame]:
-    """Plot t-SNE or UMAP visualizations for each sequence metric as subplots and
-    save the plots as a collective image with subplots in the specified directory.
+    """Plot scatter plots as subplots and save the collective plot in the specified
+    directory, save_dir.
 
     Parameters
     ----------
     data_proj : np.ndarray
-        Transformed embeddings after running t-SNE or UMAP.
+        Coordinates of the scatter points to be plotted. Coordinates are the same for
+        each of the subplots.
     paint_df : pd.DataFrame
-        Dataframe containing information of sequence metrics for each DNA sequence.
+        Dataframe containing values of each scatter point for each of the subplots.
     save_dir : Path
         Path to save plots. Must be a directory.
-    tsne_umap : str
-        "tsne" or "umap" to specify the type of cluster plot, by default "umap."
+    file_name_ending : str
+        Ending of the file name to specify the type of plot.
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
     Returns
     -------
     Dict[str, pd.DataFrame]
-        Dataframes with plotting values.
+        Dataframes with plotting coordinates and plotting values.
 
     Raises
     ------
@@ -239,7 +239,7 @@ def plot_cluster_subplots(
         plt.tight_layout()
 
     # save each plot as a collective image with subplots in the specified directory, save_dir
-    fig.savefig(save_dir / f"SeqMetrics_{tsne_umap}.png", dpi=300)
+    fig.savefig(save_dir / f"SeqMetrics_{file_name_ending}.png", dpi=300)
     return df_dict
 
 
@@ -309,7 +309,7 @@ def get_cluster(
             data_proj=data_proj,
             paint_df=paint_df,
             save_dir=save_dir,
-            tsne_umap=tsne_umap,
+            file_name_ending=tsne_umap,
         )
     return {
         str(key): plot_cluster(
@@ -317,7 +317,7 @@ def get_cluster(
             paint=paint_df[key].values,
             paint_name=str(key),
             save_dir=save_dir,
-            tsne_umap=tsne_umap,
+            file_name_ending=tsne_umap,
         )
         for key in paint_df
     }
@@ -343,7 +343,7 @@ def plot_metrics_hist(
     Raises
     ------
     ValueError
-        If the path to save the plot is not a directory.
+        If the given save_dir is not a directory.
     """
     if not save_dir.is_dir():
         raise ValueError(f"{save_dir} is not a directory!")
@@ -388,7 +388,7 @@ def plot_embed_dist_vs_align_score(
     ValueError
         If alignment_type is neither "global" nor "local."
     ValueError
-        If the path to save the plot is not a directory.
+        If the given save_dir is not a directory.
     """
     if not save_dir.is_dir():
         raise ValueError(f"{save_dir} is not a directory!")
@@ -426,6 +426,25 @@ def plot_embed_dist_vs_align_score(
 def plot_align_hist_mean_max_min(
     scores_matrix: np.ndarray, save_dir: Path = Path(""), plot_title: str = ""
 ) -> None:
+    """Plot a histogram showing the distributions of mean, max, and min alignment scores
+    between the alignment of two collections of sequences.
+
+    Parameters
+    ----------
+    scores_matrix : np.ndarray
+        Alignment scores matrix aligning two collections of sequences seqs1 and seqs2.
+        Matrix should have the dimension M * N, where M is the length of seqs1, and N
+        is the length of seqs2.
+    save_dir : Path, optional
+        Directory to save the histogram, by default Path("").
+    plot_title : str, optional
+        Title of the histogram, by default "".
+
+    Raises
+    ------
+    ValueError
+        If the given save_dir is not a directory.
+    """
     if not save_dir.is_dir():
         raise ValueError(f"{save_dir} is not a directory!")
 
@@ -544,6 +563,7 @@ def parse_args() -> Namespace:
         type=float,
         help="Extend gap score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
     )
+
     return parser.parse_args()
 
 
