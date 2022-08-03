@@ -247,7 +247,7 @@ def alignment_scores_parallel(
         extend_gap_score=extend_gap_score,
     )
 
-    chunksize = len(seqs1_rec) // num_workers
+    chunksize = max(1, len(seqs1_rec) // num_workers)
     scores_matrix = []
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         for scores in tqdm(
