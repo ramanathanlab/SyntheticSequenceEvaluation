@@ -105,9 +105,7 @@ def seq_length(seqs: List[SeqRecord]) -> List[float]:
     return [len(rec.seq) for rec in seqs]
 
 
-def molecular_weight(
-    protein_seqs: List[SeqRecord], print_rec: bool = False
-) -> List[float]:
+def molecular_weight(protein_seqs: List[SeqRecord]) -> List[float]:
     """Given a list of protein sequences, return each protein's molecular weight.
 
     Parameters
@@ -120,16 +118,7 @@ def molecular_weight(
     List
         Molecular weight of each protein.
     """
-    # return [SeqUtils.molecular_weight(rec.seq, "protein") for rec in protein_seqs]
-
-    mol_weight_list = []
-    for rec in protein_seqs:
-        if print_rec:
-            print(rec)
-            print(str(rec.seq))
-        mol_weight = SeqUtils.molecular_weight(rec.seq, "protein")
-        mol_weight_list.append(mol_weight)
-    return mol_weight_list
+    return [SeqUtils.molecular_weight(rec.seq, "protein") for rec in protein_seqs]
 
 
 def isoelectric_point(protein_seqs: List[SeqRecord]) -> List[float]:
@@ -145,15 +134,7 @@ def isoelectric_point(protein_seqs: List[SeqRecord]) -> List[float]:
     List
         Isoelectric point of each protein.
     """
-    # return [IsoelectricPoint(seq).pi() for seq in protein_seqs]
-
-    isoelectric_point_list = []
-    for rec in protein_seqs:
-        # print(rec)
-        # print(str(rec.seq))
-        isoelectric_point = IsoelectricPoint(rec).pi()
-        isoelectric_point_list.append(isoelectric_point)
-    return isoelectric_point_list
+    return [IsoelectricPoint(seq).pi() for seq in protein_seqs]
 
 
 def compute_alignment_scores(
