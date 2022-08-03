@@ -2,7 +2,7 @@
 import functools
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -182,7 +182,6 @@ def compute_alignment_scores(
         open_gap_score=open_gap_score,
         extend_gap_score=extend_gap_score,
     )
-
     scores = np.array([aligner.align(target_seq, seq.seq).score for seq in query_seqs])
 
     return scores
@@ -412,3 +411,112 @@ def get_avg_scores_df(
         }
     )
     return avg_scores_df
+
+
+def get_mean_align_scores(scores_matrix: np.ndarray) -> np.ndarray:
+    """Given an alignment scores matrix aligning two collections of sequences
+    seqs1 and seqs2, return the mean alignment scores for the alignments
+    between each sequence in seqs1 and all sequences in seqs2.
+
+    Parameters
+    ----------
+    scores_matrx : np.ndarray
+        Alignment scores matrix aligning two collections of sequences seqs1 and seqs2.
+        Matrix should have the dimension M * N, where M is the length of seqs1, and N
+        is the length of seqs2.
+
+    Returns
+    -------
+    np.array
+        Mean alignment scores for the alignments between each sequence in
+        seqs1 and all sequences in seqs2.
+    """
+    return np.mean(scores_matrix, axis=1)
+
+
+def get_max_align_scores(scores_matrix: np.ndarray) -> np.ndarray:
+    """Given an alignment scores matrix aligning two collections of sequences
+    seqs1 and seqs2, return the max alignment scores for the alignments
+    between each sequence in seqs1 and all sequences in seqs2.
+
+    Parameters
+    ----------
+    scores_matrx : np.ndarray
+        Alignment scores matrix aligning two collections of sequences seqs1 and seqs2.
+        Matrix should have the dimension M * N, where M is the length of seqs1, and N
+        is the length of seqs2.
+
+    Returns
+    -------
+    np.array
+        Max alignment scores for the alignments between each sequence in
+        seqs1 and all sequences in seqs2.
+    """
+    return np.amax(scores_matrix, axis=1)
+
+
+def get_min_align_scores(scores_matrix: np.ndarray) -> np.ndarray:
+    """Given an alignment scores matrix aligning two collections of sequences
+    seqs1 and seqs2, return the min alignment scores for the alignments
+    between each sequence in seqs1 and all sequences in seqs2.
+
+    Parameters
+    ----------
+    scores_matrx : np.ndarray
+        Alignment scores matrix aligning two collections of sequences seqs1 and seqs2.
+        Matrix should have the dimension M * N, where M is the length of seqs1, and N
+        is the length of seqs2.
+
+    Returns
+    -------
+    np.array
+        Min alignment scores for the alignments between each sequence in
+        seqs1 and all sequences in seqs2.
+    """
+    return np.amin(scores_matrix, axis=1)
+
+
+def select_seqs_from_alignment(
+    scores_matrix: np.ndarray, num_seqs_selected: int, select_type: str
+) -> Dict[str, np.ndarray]:
+    """Select a specified number of sequences with the highest mean or max alignment scores
+    and return the sequences' corresponding indices and alignment score values.
+
+    Parameters
+    ----------
+    scores_matrix : np.ndarray
+        Alignment scores matrix aligning two collections of sequences seqs1 and seqs2.
+        Matrix should have the dimension M * N, where M is the length of seqs1, and N
+        is the length of seqs2.
+    num_seqs_selected : int
+        Number of sequences to select.
+    select_type : str
+        "mean" or "max".
+
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Dictionary containing two keys, "selected seqs indices" or "selected seqs scores".
+
+    Raises
+    ------
+    ValueError
+        If select_type is not either "mean" or "max".
+    """
+    if type == "mean":
+        scores = get_mean_align_scores(scores_matrix=scores_matrix)
+    elif type == "max":
+        scores = get_max_align_scores(scores_matrix=scores_matrix)
+    else:
+        raise ValueError(f"Invalid select type: {select_type}. Must be mean or max.")
+
+    selected_dict = {}
+    scores_sorted_inds = np.argsort(scores)
+
+    selected_inds = scores_sorted_inds[-num_seqs_selected:]
+    selected_dict["selected seqs indices"] = selected_inds
+
+    selected_scores = scores[selected_inds]
+    selected_dict["selected seqs scores"] = selected_scores
+
+    return selected_dict
