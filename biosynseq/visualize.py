@@ -425,7 +425,7 @@ def plot_embed_dist_vs_align_score(
 
 def plot_align_hist_mean_max_min(
     scores_matrix: np.ndarray, save_dir: Path = Path(""), plot_title: str = ""
-) -> None:
+) -> Dict[str, np.ndarray]:
     """Plot a histogram showing the distributions of mean, max, and min alignment scores
     between the alignment of two collections of sequences.
 
@@ -439,6 +439,11 @@ def plot_align_hist_mean_max_min(
         Directory to save the histogram, by default Path("").
     plot_title : str, optional
         Title of the histogram, by default "".
+
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Dictionary of mean, max, and min alignment scores
 
     Raises
     ------
@@ -465,6 +470,13 @@ def plot_align_hist_mean_max_min(
 
     print(f"Histogram align mean-max-min plot has been saved to {save_dir}.")
 
+    # save the mean/max/min scores and return them in a dictionary
+    scores_dict = {}
+    scores_dict["mean"] = mean_scores
+    scores_dict["max"] = max_scores
+    scores_dict["min"] = min_scores
+    return scores_dict
+
 
 def parse_args() -> Namespace:
     """Parse command line arguments.
@@ -479,7 +491,7 @@ def parse_args() -> Namespace:
         "--mode",
         type=str,
         required=True,
-        help="Allowed inputs: tsne, umap, align_plot",
+        help="Allowed inputs: tsne, umap, align_plot, align_hist_mean_max_min",
     )
     parser.add_argument(
         "--embed_path",
@@ -489,6 +501,14 @@ def parse_args() -> Namespace:
     )
     parser.add_argument(
         "--fasta_path", type=Path, required=True, help="Path to access fasta sequences."
+    )
+    parser.add_argument(
+        "--embed_path2",
+        type=Path,
+        help="Path to access embeddings for a second set of sequences. Embeddings could be for training, validation, testing, or generated sequences.",
+    )
+    parser.add_argument(
+        "--fasta_path2", type=Path, help="Path to access a second set of fasta sequences."
     )
     parser.add_argument(
         "--save_dir",
@@ -525,10 +545,10 @@ def parse_args() -> Namespace:
         help="Seed used by the random number generator during embedding initialization and during sampling used by the optimizer to run UMAP.",
     )
     parser.add_argument(
-        "--align_plot_title",
+        "--plot_title",
         default="",
         type=str,
-        help="Title for embed dist vs. align score plot.",
+        help="Title for embed dist vs. align score plot OR for histogram of mean/max/min alignment scores.",
     )
     parser.add_argument(
         "--alignment_type", default="global", type=str, help="global or local"
@@ -563,7 +583,7 @@ def parse_args() -> Namespace:
         type=float,
         help="Extend gap score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
     )
-
+    
     return parser.parse_args()
 
 
@@ -586,9 +606,10 @@ def main() -> None:
     ValueError
         If mode is invalid.
     """
+    if args.save_dir is None:
+        raise ValueError("save_dir is not specified.")
+
     if (args.mode == "tsne") or (args.mode == "umap"):
-        if args.save_dir is None:
-            raise ValueError("save_dir is not specified.")
         embed_avg = metrics.get_embed_avg(args.embed_path)
         paint_df = get_paint_df(args.fasta_path, args.embed_path)
         get_cluster(
@@ -604,8 +625,20 @@ def main() -> None:
         )
         print(f"Cluster plots have been saved to {args.save_dir}.")
     elif args.mode == "align_plot":
-        if args.save_dir is None:
-            raise ValueError("save_dir is not specified.")
+        """
+        required argparse arguments to pass through:
+        --save_dir
+        --mode
+        --embed_path
+        --fasta_path
+        --alignment_type
+        --plot_title (default="")
+        --num_workers (default=1)
+        --match_score (default=1.0)
+        --mismatch_score (default=0.0)
+        --open_gap_score (default=0.0)
+        --extend_gap_score (default=0.0)
+        """
         embed_avg = metrics.get_embed_avg(args.embed_path)
         dna_seqs = metrics.get_seqs_from_fasta(args.fasta_path)
         embed = np.load(args.embed_path)
@@ -634,8 +667,51 @@ def main() -> None:
             avg_scores_df=avg_scores_df,
             save_dir=args.save_dir,
             alignment_type=args.alignment_type,
-            plot_title=args.align_plot_title,
+            plot_title=args.plot_title,
         )
+    elif args.mode=="align_hist_mean_max_min":
+        """
+        required argparse arguments to pass through:
+        --save_dir
+        --mode
+        --embed_path
+        --fasta_path
+        --embed_path2
+        --fasta_path2
+        --alignment_type
+        --plot_title (default="")
+        --num_workers (default=1)
+        --match_score (default=1.0)
+        --mismatch_score (default=0.0)
+        --open_gap_score (default=0.0)
+        --extend_gap_score (default=0.0)
+        """
+        # get the protein sequences for the first set of nucleotide sequences
+        dna_seqs1 = metrics.get_seqs_from_fasta(args.fasta_path)
+        embed1 = np.load(args.embed_path)
+        dna_seqs1 = dna_seqs1[: len(embed1)]  # clip DNA sequence to embedding length
+        protein_seqs1 = metrics.dna_to_protein_seqs(dna_seqs1)
+
+        # get the protein sequences for the second set of nucleotide sequences
+        dna_seqs2 = metrics.get_seqs_from_fasta(args.fasta_path2)
+        embed2 = np.load(args.embed_path2)
+        dna_seqs2 = dna_seqs2[: len(embed2)]  # clip DNA sequence to embedding length
+        protein_seqs2 = metrics.dna_to_protein_seqs(dna_seqs2)
+
+        # compute pairwise alignment scores matrix
+        proteins12_align_scores_matrix = metrics.alignment_scores_parallel(
+            seqs1_rec=protein_seqs1,
+            seqs2_rec=protein_seqs2,
+            alignment_type=args.alignment_type,
+            num_workers=args.num_workers,
+            match_score=args.match_score,
+            mismatch_score=args.mismatch_score,
+            open_gap_score=args.open_gap_score,
+            extend_gap_score=args.extend_gap_score,
+        )
+
+        # plot the histogram distributions of mean, max, and min alignment scores
+        plot_align_hist_mean_max_min(proteins12_align_scores_matrix, save_dir=args.save_dir, plot_title=args.plot_title)
     else:
         raise ValueError(f"Invalid mode: {args.mode}")
 
