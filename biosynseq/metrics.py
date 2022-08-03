@@ -2,7 +2,7 @@
 import functools
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 import numpy as np
 import pandas as pd
@@ -120,16 +120,7 @@ def molecular_weight(
     List
         Molecular weight of each protein.
     """
-    # return [SeqUtils.molecular_weight(rec.seq, "protein") for rec in protein_seqs]
-
-    mol_weight_list = []
-    for rec in protein_seqs:
-        if print_rec:
-            print(rec)
-            print(str(rec.seq))
-        mol_weight = SeqUtils.molecular_weight(rec.seq, "protein")
-        mol_weight_list.append(mol_weight)
-    return mol_weight_list
+    return [SeqUtils.molecular_weight(rec.seq, "protein") for rec in protein_seqs]
 
 
 def isoelectric_point(protein_seqs: List[SeqRecord]) -> List[float]:
@@ -145,15 +136,7 @@ def isoelectric_point(protein_seqs: List[SeqRecord]) -> List[float]:
     List
         Isoelectric point of each protein.
     """
-    # return [IsoelectricPoint(seq).pi() for seq in protein_seqs]
-
-    isoelectric_point_list = []
-    for rec in protein_seqs:
-        # print(rec)
-        # print(str(rec.seq))
-        isoelectric_point = IsoelectricPoint(rec).pi()
-        isoelectric_point_list.append(isoelectric_point)
-    return isoelectric_point_list
+    return [IsoelectricPoint(seq).pi() for seq in protein_seqs]
 
 
 def compute_alignment_scores(
@@ -201,7 +184,6 @@ def compute_alignment_scores(
         open_gap_score=open_gap_score,
         extend_gap_score=extend_gap_score,
     )
-
     scores = np.array([aligner.align(target_seq, seq.seq).score for seq in query_seqs])
 
     return scores
@@ -358,7 +340,10 @@ def get_scores_df(
     embed_dist_upper = get_embed_dist_flatten(embed_avg=embed_avg)
     scores_upper = get_scores_flatten(scores_matrix=scores_matrix)
     scores_df = pd.DataFrame(
-        {"Embedding L2 Distance": embed_dist_upper, align_key: scores_upper,}
+        {
+            "Embedding L2 Distance": embed_dist_upper,
+            align_key: scores_upper,
+        }
     )
     return scores_df
 
@@ -419,3 +404,35 @@ def get_avg_scores_df(
         }
     )
     return avg_scores_df
+
+def get_mean_min_max_align_scores(scores_matrix: np.ndarray) -> Dict[str, np.ndarray]:
+    """Given an alignment scores matrix aligning two collections of sequences
+    seqs1 and seqs2, return the mean, min, and max alignment scores for the alignments
+    between each sequence in seqs1 and all sequences in seqs2.
+
+    Parameters
+    ----------
+    scores_matrx : np.ndarray
+        Alignment scores matrix aligning two collections of sequences seqs1 and seqs2.
+        Matrix should have the dimension M * N, where M is the length of seqs1, and N
+        is the length of seqs2.
+
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Mean, min, and max alignment scores for the alignments between each sequence in
+        seqs1 and all sequences in seqs2. There are three key words: "mean", "min", "max".
+    """
+    scores_dict = {}
+    # mean
+    mean_scores = np.mean(scores_matrix, axis=1)
+    scores_dict["mean"] = mean_scores
+    # min
+    min_scores = np.amin(scores_matrix, axis=1)
+    scores_dict["min"] = min_scores
+    # max
+    max_scores = np.amax(scores_matrix, axis=1)
+    scores_dict["max"] = max_scores
+
+    return scores_dict
+
