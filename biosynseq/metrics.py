@@ -246,7 +246,7 @@ def alignment_scores_parallel(
         extend_gap_score=extend_gap_score,
     )
 
-    chunksize = len(seqs1_rec) // num_workers
+    chunksize = max(1, len(seqs1_rec) // num_workers)
     scores_matrix = []
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         for scores in tqdm(
@@ -255,6 +255,29 @@ def alignment_scores_parallel(
             scores_matrix.append(scores)
 
     return np.array(scores_matrix)
+
+
+def triu_flatten(
+    a: np.ndarray, subtract_diag: bool = False, only_positive: bool = False
+) -> np.ndarray:
+    """Get upper triangular matrix and flatten.
+
+    Parameters
+    ----------
+    a : np.ndarray
+        Matrix of shape (N, N).
+    subtract_diag : bool, default=False
+        Subtract off the diagonal before flattening.
+    only_positive : bool, default=False
+        Only returns positive entries.
+    """
+    out = np.triu(a - np.diag(np.diag(a))) if subtract_diag else np.triu(a)
+    out = out.flatten()
+
+    if only_positive:
+        out = out[out > 0]
+
+    return out
 
 
 def get_embed_dist_flatten(embed_avg: np.ndarray) -> np.ndarray:
@@ -271,41 +294,43 @@ def get_embed_dist_flatten(embed_avg: np.ndarray) -> np.ndarray:
     np.ndarray
         Flattened distance matrix between all embeddings.
     """
-    # get embedding distance
+    # get embedding l2 distance matrix
     embed_dist = distance_matrix(embed_avg, embed_avg)
-
     # get upper triangular matrix and flatten
-    embed_dist_upper = np.triu(embed_dist).flatten()
-    embed_dist_upper = embed_dist_upper[embed_dist_upper > 0]
-
-    return embed_dist_upper
+    return triu_flatten(embed_dist, only_positive=True)
 
 
-def get_scores_flatten(scores_matrix: np.ndarray) -> np.ndarray:
-    """Given a scores matrix, flatten all scores into a one-dimensional array.
-    scores_matrix can be global_scores_matrix or local_scores_matrix.
+def _get_alignment_name(alignment_type: str) -> str:
+    """Convert algorithm name to clean format.
 
     Parameters
     ----------
-    scores_matrix : np.ndarray
-        Scores matrix containing pairwise alignment scores.
+    alignment_type : str
+        Algorithm type "local" or "global".
 
     Returns
     -------
-    np.ndarray
-        One-dimensional array of flattened scores.
+    str
+        Output name with clean format.
+
+    Raises
+    ------
+    ValueError
+        If alignment_type is neither "global" nor "local".
     """
-    # need to subtract from diagonal since alignment scores between the same seqeunce will be large positive values
-    scores_upper = np.triu(scores_matrix - np.diag(np.diag(scores_matrix))).flatten()
-    scores_upper = scores_upper[scores_upper > 0]
-    return scores_upper
+    if alignment_type == "global":
+        return "Global Alignment Score"
+    if alignment_type == "local":
+        return "Local Alignment Score"
+    raise ValueError(f"Invalid alignment type: {alignment_type}")
 
 
 def get_scores_df(
     embed_avg: np.ndarray, scores_matrix: np.ndarray, alignment_type: str = "global"
 ) -> pd.DataFrame:
-    """Compute a two-column scores dataframe comparing the embedding L2 distance and the pairwise alignment scores,
-    given the average embeddings for the sequences, the scores matrix, and the alignment type.
+    """Compute a two-column scores dataframe comparing the embedding
+    L2 distance and the pairwise alignment scores, given the average
+    embeddings for the sequences, the scores matrix, and the alignment type.
 
     Parameters
     ----------
@@ -319,24 +344,17 @@ def get_scores_df(
     Returns
     -------
     pd.DataFrame
-        Two-column dataframe comparing the embedding L2 distance and the pairwise alignment scores.
+        Two-column dataframe comparing the embedding L2 distance and the
+        pairwise alignment scores.
 
     Raises
     ------
     ValueError
-        If alignment_type is neither "global" nor "local."
+        If alignment_type is neither "global" nor "local".
     """
-    # scores_matrix could be either global_scores_matrix or local_scores_matrix, specified by global_score = True or False
-
-    if alignment_type == "global":
-        align_key = "Global Alignment Score"
-    elif alignment_type == "local":
-        align_key = "Local Alignment Score"
-    else:
-        raise ValueError(f"Invalid alignment type: {alignment_type}")
-
-    embed_dist_upper = get_embed_dist_flatten(embed_avg=embed_avg)
-    scores_upper = get_scores_flatten(scores_matrix=scores_matrix)
+    align_key = _get_alignment_name(alignment_type)
+    embed_dist_upper = get_embed_dist_flatten(embed_avg)
+    scores_upper = triu_flatten(scores_matrix, subtract_diag=True, only_positive=True)
     scores_df = pd.DataFrame(
 <<<<<<< HEAD
         {
@@ -373,16 +391,10 @@ def get_avg_scores_df(
     Raises
     ------
     ValueError
-        If alignment_type is neither "global" nor "local."
+        If alignment_type is neither "global" nor "local".
     """
 
-    if alignment_type == "global":
-        align_key = "Global Alignment Score"
-    elif alignment_type == "local":
-        align_key = "Local Alignment Score"
-    else:
-        raise ValueError(f"Invalid alignment type: {alignment_type}")
-
+    align_key = _get_alignment_name(alignment_type)
     unique_scores = scores_df[align_key].unique()
 
     # calculate embedding distance average
