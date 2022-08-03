@@ -503,9 +503,9 @@ def select_seqs_from_alignment(
     ValueError
         If select_type is not either "mean" or "max".
     """
-    if type == "mean":
+    if select_type == "mean":
         scores = get_mean_align_scores(scores_matrix=scores_matrix)
-    elif type == "max":
+    elif select_type == "max":
         scores = get_max_align_scores(scores_matrix=scores_matrix)
     else:
         raise ValueError(f"Invalid select type: {select_type}. Must be mean or max.")
