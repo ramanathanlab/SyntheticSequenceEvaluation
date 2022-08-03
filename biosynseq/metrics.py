@@ -301,11 +301,37 @@ def get_embed_dist_flatten(embed_avg: np.ndarray) -> np.ndarray:
     return triu_flatten(embed_dist, only_positive=True)
 
 
+def _get_alignment_name(alignment_type: str) -> str:
+    """Convert algorithm name to clean format.
+
+    Parameters
+    ----------
+    alignment_type : str
+        Algorithm type "local" or "global".
+
+    Returns
+    -------
+    str
+        Output name with clean format.
+
+    Raises
+    ------
+    ValueError
+        If alignment_type is neither "global" nor "local".
+    """
+    if alignment_type == "global":
+        return "Global Alignment Score"
+    if alignment_type == "local":
+        return "Local Alignment Score"
+    raise ValueError(f"Invalid alignment type: {alignment_type}")
+
+
 def get_scores_df(
     embed_avg: np.ndarray, scores_matrix: np.ndarray, alignment_type: str = "global"
 ) -> pd.DataFrame:
-    """Compute a two-column scores dataframe comparing the embedding L2 distance and the pairwise alignment scores,
-    given the average embeddings for the sequences, the scores matrix, and the alignment type.
+    """Compute a two-column scores dataframe comparing the embedding
+    L2 distance and the pairwise alignment scores, given the average
+    embeddings for the sequences, the scores matrix, and the alignment type.
 
     Parameters
     ----------
@@ -319,23 +345,15 @@ def get_scores_df(
     Returns
     -------
     pd.DataFrame
-        Two-column dataframe comparing the embedding L2 distance and the pairwise alignment scores.
+        Two-column dataframe comparing the embedding L2 distance and the
+        pairwise alignment scores.
 
     Raises
     ------
     ValueError
-        If alignment_type is neither "global" nor "local."
+        If alignment_type is neither "global" nor "local".
     """
-    # scores_matrix could be either global_scores_matrix or local_scores_matrix,
-    # specified by global_score = True or False
-
-    if alignment_type == "global":
-        align_key = "Global Alignment Score"
-    elif alignment_type == "local":
-        align_key = "Local Alignment Score"
-    else:
-        raise ValueError(f"Invalid alignment type: {alignment_type}")
-
+    align_key = _get_alignment_name(alignment_type)
     embed_dist_upper = get_embed_dist_flatten(embed_avg)
     scores_upper = triu_flatten(scores_matrix, subtract_diag=True, only_positive=True)
     scores_df = pd.DataFrame(
@@ -367,16 +385,10 @@ def get_avg_scores_df(
     Raises
     ------
     ValueError
-        If alignment_type is neither "global" nor "local."
+        If alignment_type is neither "global" nor "local".
     """
 
-    if alignment_type == "global":
-        align_key = "Global Alignment Score"
-    elif alignment_type == "local":
-        align_key = "Local Alignment Score"
-    else:
-        raise ValueError(f"Invalid alignment type: {alignment_type}")
-
+    align_key = _get_alignment_name(alignment_type)
     unique_scores = scores_df[align_key].unique()
 
     # calculate embedding distance average
