@@ -12,7 +12,6 @@ conda create -n mdhpipeline -c rapidsai -c nvidia -c conda-forge  \
 conda activate mdhpipeline
 export IBM_POWERAI_LICENSE_ACCEPT=yes
 pip install -U scikit-learn
-pip install mdlearn
 
 conda install matplotlib
 conda uninstall pytorch

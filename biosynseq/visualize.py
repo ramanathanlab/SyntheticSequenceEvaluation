@@ -458,9 +458,9 @@ def plot_align_hist_mean_max_min(
         raise ValueError(f"{save_dir} is not a directory!")
 
     # compute the mean, max, min alignment score values
-    mean_scores = metrics.get_mean_align_scores(scores_matrix=scores_matrix)
-    max_scores = metrics.get_max_align_scores(scores_matrix=scores_matrix)
-    min_scores = metrics.get_min_align_scores(scores_matrix=scores_matrix)
+    mean_scores = metrics.get_mean_align_scores(scores_matrix)
+    max_scores = metrics.get_max_align_scores(scores_matrix)
+    min_scores = metrics.get_min_align_scores(scores_matrix)
 
     plt.hist(mean_scores, bins=None, alpha=0.5, label="mean")
     plt.hist(max_scores, bins=None, alpha=0.5, label="max")
@@ -470,15 +470,12 @@ def plot_align_hist_mean_max_min(
     plt.title(plot_title)
     plt.legend()
 
-    plt.savefig(save_dir / ("histogram_align_mean_max_min.png"), dpi=300)
+    plt.savefig(save_dir / "histogram_align_mean_max_min.png", dpi=300)
 
     print(f"Histogram align mean-max-min plot has been saved to {save_dir}.")
 
     # save the mean/max/min scores and return them in a dictionary
-    scores_dict = {}
-    scores_dict["mean"] = mean_scores
-    scores_dict["max"] = max_scores
-    scores_dict["min"] = min_scores
+    scores_dict = {"mean": mean_scores, "max": max_scores, "min": min_scores}
     return scores_dict
 
 
@@ -512,7 +509,9 @@ def parse_args() -> Namespace:
         help="Path to access embeddings for a second set of sequences. Embeddings could be for training, validation, testing, or generated sequences.",
     )
     parser.add_argument(
-        "--fasta_path2", type=Path, help="Path to access a second set of fasta sequences."
+        "--fasta_path2",
+        type=Path,
+        help="Path to access a second set of fasta sequences.",
     )
     parser.add_argument(
         "--save_dir",
@@ -587,7 +586,7 @@ def parse_args() -> Namespace:
         type=float,
         help="Extend gap score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
     )
-    
+
     return parser.parse_args()
 
 
@@ -673,7 +672,7 @@ def main() -> None:
             alignment_type=args.alignment_type,
             plot_title=args.plot_title,
         )
-    elif args.mode=="align_hist_mean_max_min":
+    elif args.mode == "align_hist_mean_max_min":
         """
         required argparse arguments to pass through:
         --save_dir
@@ -715,7 +714,11 @@ def main() -> None:
         )
 
         # plot the histogram distributions of mean, max, and min alignment scores
-        plot_align_hist_mean_max_min(proteins12_align_scores_matrix, save_dir=args.save_dir, plot_title=args.plot_title)
+        plot_align_hist_mean_max_min(
+            proteins12_align_scores_matrix,
+            save_dir=args.save_dir,
+            plot_title=args.plot_title,
+        )
     else:
         raise ValueError(f"Invalid mode: {args.mode}")
 
