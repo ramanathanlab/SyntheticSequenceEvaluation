@@ -125,7 +125,7 @@ def plot_cluster(
     data_proj: np.ndarray,
     paint: np.ndarray,
     paint_name: str,
-    save_dir: Path,
+    save_dir: Path = Path(""),
     file_name_ending: str = "",
     cmap: str = "plasma",
 ) -> pd.DataFrame:
@@ -140,7 +140,8 @@ def plot_cluster(
     paint_name : str
         Name of the scatter plot.
     save_dir : Path
-        Path to save plots. Must be a directory.
+        Path to save plots, by default Path(""), aka saving the plot to the user's current directory.
+        Must be a directory.
     file_name_ending : str
         Ending of the file name to specify the type of plot.
     cmap : str, optional
@@ -178,7 +179,7 @@ def plot_cluster(
 def plot_cluster_subplots(
     data_proj: np.ndarray,
     paint_df: pd.DataFrame,
-    save_dir: Path,
+    save_dir: Path = Path(""),
     file_name_ending: str = "",
     cmap: str = "plasma",
 ) -> Dict[str, pd.DataFrame]:
@@ -193,7 +194,8 @@ def plot_cluster_subplots(
     paint_df : pd.DataFrame
         Dataframe containing values of each scatter point for each of the subplots.
     save_dir : Path
-        Path to save plots. Must be a directory.
+        Path to save plots, by default Path(""), aka saving the plot to the user's current directory.
+        Must be a directory.
     file_name_ending : str
         Ending of the file name to specify the type of plot.
     cmap : str, optional
@@ -246,7 +248,7 @@ def plot_cluster_subplots(
 def get_cluster(
     embed_data: np.ndarray,
     paint_df: pd.DataFrame,
-    save_dir: Path,
+    save_dir: Path = Path(""),
     tsne_umap: str = "umap",
     get_subplots: bool = False,
     umap_n_neighbors: int = 15,
@@ -264,7 +266,8 @@ def get_cluster(
     paint_df : pd.DataFrame
         Dataframe containing information of sequence metrics for each DNA sequence.
     save_dir : Path
-        Path to save plots. Must be a directory.
+        Path to save plots, by default Path(""), aka saving the plot to the user's current directory.
+        Must be a directory.
     tsne_umap : str
         "tsne" or "umap" to specify the type of cluster plot, by default "umap."
     get_subplots : bool, optional
@@ -366,7 +369,7 @@ def plot_metrics_hist(
 
 def plot_embed_dist_vs_align_score(
     avg_scores_df: pd.DataFrame,
-    save_dir: Path,
+    save_dir: Path = Path(""),
     alignment_type: str = "global",
     plot_title: str = "",
 ) -> None:
@@ -379,7 +382,8 @@ def plot_embed_dist_vs_align_score(
         Three-column dataframe comparing the average L2 distance,
     standard deviation of the L2 distance, and the pairwise alignment scores.
     save_dir : Path
-        Path to save the Pairwise Alignment Score vs. Embedding L2 Distance plot. Must be a directory.
+        Path to save the Pairwise Alignment Score vs. Embedding L2 Distance plot, by default Path(""),
+        aka saving the plot to the user's current directory. Must be a directory.
     alignment_type : str, optional
         "global" or "local", by default "global."
 
