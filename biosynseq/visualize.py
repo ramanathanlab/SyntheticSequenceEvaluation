@@ -125,40 +125,39 @@ def plot_cluster(
     data_proj: np.ndarray,
     paint: np.ndarray,
     paint_name: str,
-    cluster_path: Path,
-    tsne_umap: str = "umap",
+    save_dir: Path,
+    file_name_ending: str = "",
     cmap: str = "plasma",
 ) -> pd.DataFrame:
-    """Plot t-SNE or UMAP visualizations for each sequence metric and
-    save the plots as separate images to the specified directory.
+    """Plot a scatter plot and save it as a png image to the specified directory, save_dir.
 
     Parameters
     ----------
     data_proj : np.ndarray
-        Transformed embeddings after running t-SNE or UMAP.
+        Coordinates of the scatter points to be plotted.
     paint : np.ndarray
-        Dataframe containing information of sequence metrics for each DNA sequence.
+        Values of each scatter point.
     paint_name : str
-        Name of the sequence metric whose t-SNE or UMAP visualization will be plotted.
-    cluster_path : Path
+        Name of the scatter plot.
+    save_dir : Path
         Path to save plots. Must be a directory.
-    tsne_umap : str
-        "tsne" or "umap" to specify the type of cluster plot, by default "umap."
+    file_name_ending : str
+        Ending of the file name to specify the type of plot.
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
     Returns
     -------
     pd.DataFrame
-        Dataframe with plotting values.
+        Dataframe with plotting coordinates and plotting values.
 
     Raises
     ------
     ValueError
-        If the given cluster_path is not a directory.
+        If the given save_dir is not a directory.
     """
-    if not cluster_path.is_dir():
-        raise ValueError(f"{cluster_path} is not a directory!")
+    if not save_dir.is_dir():
+        raise ValueError(f"{save_dir} is not a directory!")
 
     df = pd.DataFrame(
         {
@@ -171,46 +170,47 @@ def plot_cluster(
     fig = ax.get_figure()
     fig.show()
 
-    # save each plot as a separate png image in the specified directory, cluster_path
-    fig.savefig(cluster_path / f"{paint_name}_{tsne_umap}.png", dpi=300)
+    # save each plot as a separate png image in the specified directory, save_dir
+    fig.savefig(save_dir / f"{paint_name}_{file_name_ending}.png", dpi=300)
     return df
 
 
 def plot_cluster_subplots(
     data_proj: np.ndarray,
     paint_df: pd.DataFrame,
-    cluster_path: Path,
-    tsne_umap: str = "umap",
+    save_dir: Path,
+    file_name_ending: str = "",
     cmap: str = "plasma",
 ) -> Dict[str, pd.DataFrame]:
-    """Plot t-SNE or UMAP visualizations for each sequence metric as subplots and
-    save the plots as a collective image with subplots in the specified directory.
+    """Plot scatter plots as subplots and save the collective plot in the specified
+    directory, save_dir.
 
     Parameters
     ----------
     data_proj : np.ndarray
-        Transformed embeddings after running t-SNE or UMAP.
+        Coordinates of the scatter points to be plotted. Coordinates are the same for
+        each of the subplots.
     paint_df : pd.DataFrame
-        Dataframe containing information of sequence metrics for each DNA sequence.
-    cluster_path : Path
+        Dataframe containing values of each scatter point for each of the subplots.
+    save_dir : Path
         Path to save plots. Must be a directory.
-    tsne_umap : str
-        "tsne" or "umap" to specify the type of cluster plot, by default "umap."
+    file_name_ending : str
+        Ending of the file name to specify the type of plot.
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
     Returns
     -------
     Dict[str, pd.DataFrame]
-        Dataframes with plotting values.
+        Dataframes with plotting coordinates and plotting values.
 
     Raises
     ------
     ValueError
-        If the given cluster_path is not a directory.
+        If the given save_dir is not a directory.
     """
-    if not cluster_path.is_dir():
-        raise ValueError(f"{cluster_path} is not a directory!")
+    if not save_dir.is_dir():
+        raise ValueError(f"{save_dir} is not a directory!")
 
     df_dict = {}
     nrows = 2
@@ -238,15 +238,15 @@ def plot_cluster_subplots(
         fig.show()
         plt.tight_layout()
 
-    # save each plot as a collective image with subplots in the specified directory, cluster_path
-    fig.savefig(cluster_path / f"SeqMetrics_{tsne_umap}.png", dpi=300)
+    # save each plot as a collective image with subplots in the specified directory, save_dir
+    fig.savefig(save_dir / f"SeqMetrics_{file_name_ending}.png", dpi=300)
     return df_dict
 
 
 def get_cluster(
     embed_data: np.ndarray,
     paint_df: pd.DataFrame,
-    cluster_path: Path,
+    save_dir: Path,
     tsne_umap: str = "umap",
     get_subplots: bool = False,
     umap_n_neighbors: int = 15,
@@ -263,7 +263,7 @@ def get_cluster(
         Sequence embeddings to be transformed by t-SNE or UMAP. Must be 2-dimensional.
     paint_df : pd.DataFrame
         Dataframe containing information of sequence metrics for each DNA sequence.
-    cluster_path : Path
+    save_dir : Path
         Path to save plots. Must be a directory.
     tsne_umap : str
         "tsne" or "umap" to specify the type of cluster plot, by default "umap."
@@ -308,23 +308,23 @@ def get_cluster(
         return plot_cluster_subplots(
             data_proj=data_proj,
             paint_df=paint_df,
-            cluster_path=cluster_path,
-            tsne_umap=tsne_umap,
+            save_dir=save_dir,
+            file_name_ending=tsne_umap,
         )
     return {
         str(key): plot_cluster(
             data_proj=data_proj,
             paint=paint_df[key].values,
             paint_name=str(key),
-            cluster_path=cluster_path,
-            tsne_umap=tsne_umap,
+            save_dir=save_dir,
+            file_name_ending=tsne_umap,
         )
         for key in paint_df
     }
 
 
 def plot_metrics_hist(
-    paint_dfs: List[pd.DataFrame], labels: List[str], save_path: Path = Path("")
+    paint_dfs: List[pd.DataFrame], labels: List[str], save_dir: Path = Path("")
 ) -> None:
     """Plot the sequence metrics histograms across generated, test, validation, and/or
     training sequences, with each subplot representing a metric, and save the plot to the
@@ -337,16 +337,16 @@ def plot_metrics_hist(
     labels : List[str]
         List of labels containing the names of the type of sequences, in the order that these
         sequence types are arranged in paint_dfs.
-    save_path : Path
+    save_dir : Path
         Path to save the metrics histograms.
 
     Raises
     ------
     ValueError
-        If the path to save the plot is not a directory.
+        If the given save_dir is not a directory.
     """
-    if not save_path.is_dir():
-        raise ValueError(f"{save_path} is not a directory!")
+    if not save_dir.is_dir():
+        raise ValueError(f"{save_dir} is not a directory!")
 
     ncols = 2
     nrows = int(np.ceil(len(paint_dfs[0].columns) / 2))
@@ -359,14 +359,14 @@ def plot_metrics_hist(
         plt.legend(loc="upper left")
         plt.title(key)
 
-    plt.savefig(save_path / "metrics_hist.png", dpi=300)
+    plt.savefig(save_dir / "metrics_hist.png", dpi=300)
 
-    print(f"Metrics histogram plot has been saved to {save_path}.")
+    print(f"Metrics histogram plot has been saved to {save_dir}.")
 
 
 def plot_embed_dist_vs_align_score(
     avg_scores_df: pd.DataFrame,
-    save_path: Path,
+    save_dir: Path,
     alignment_type: str = "global",
     plot_title: str = "",
 ) -> None:
@@ -378,7 +378,7 @@ def plot_embed_dist_vs_align_score(
     avg_scores_df : pd.DataFrame
         Three-column dataframe comparing the average L2 distance,
     standard deviation of the L2 distance, and the pairwise alignment scores.
-    save_path : Path
+    save_dir : Path
         Path to save the Pairwise Alignment Score vs. Embedding L2 Distance plot. Must be a directory.
     alignment_type : str, optional
         "global" or "local", by default "global."
@@ -388,10 +388,10 @@ def plot_embed_dist_vs_align_score(
     ValueError
         If alignment_type is neither "global" nor "local."
     ValueError
-        If the path to save the plot is not a directory.
+        If the given save_dir is not a directory.
     """
-    if not save_path.is_dir():
-        raise ValueError(f"{save_path} is not a directory!")
+    if not save_dir.is_dir():
+        raise ValueError(f"{save_dir} is not a directory!")
 
     align_key = metrics._get_alignment_name(alignment_type)
 
@@ -418,16 +418,40 @@ def plot_embed_dist_vs_align_score(
     plt.yticks(fontsize=14)
     plt.legend()
 
-    plt.savefig(save_path / "Embed_dist_vs_align_score.png", dpi=300)
+    plt.savefig(save_dir / "Embed_dist_vs_align_score.png", dpi=300)
 
-    print(f"Alignment Score vs. Embedding Distance plot has been saved to {save_path}.")
+    print(f"Embedding distance vs. alignment score plot has been saved to {save_dir}.")
 
 
 def plot_align_hist_mean_max_min(
-    scores_matrix: np.ndarray, save_path: Path = Path(""), plot_title: str = ""
-) -> None:
-    if not save_path.is_dir():
-        raise ValueError(f"{save_path} is not a directory!")
+    scores_matrix: np.ndarray, save_dir: Path = Path(""), plot_title: str = ""
+) -> Dict[str, np.ndarray]:
+    """Plot a histogram showing the distributions of mean, max, and min alignment scores
+    between the alignment of two collections of sequences.
+
+    Parameters
+    ----------
+    scores_matrix : np.ndarray
+        Alignment scores matrix aligning two collections of sequences seqs1 and seqs2.
+        Matrix should have the dimension M * N, where M is the length of seqs1, and N
+        is the length of seqs2.
+    save_dir : Path, optional
+        Directory to save the histogram, by default Path("").
+    plot_title : str, optional
+        Title of the histogram, by default "".
+
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Dictionary of mean, max, and min alignment scores
+
+    Raises
+    ------
+    ValueError
+        If the given save_dir is not a directory.
+    """
+    if not save_dir.is_dir():
+        raise ValueError(f"{save_dir} is not a directory!")
 
     # compute the mean, max, min alignment score values
     mean_scores = metrics.get_mean_align_scores(scores_matrix)
@@ -442,9 +466,13 @@ def plot_align_hist_mean_max_min(
     plt.title(plot_title)
     plt.legend()
 
-    plt.savefig(save_path / "histogram_align_mean_max_min.png", dpi=300)
+    plt.savefig(save_dir / "histogram_align_mean_max_min.png", dpi=300)
 
-    print(f"Histogram align mean max min plot has been saved to {save_path}.")
+    print(f"Histogram align mean-max-min plot has been saved to {save_dir}.")
+
+    # save the mean/max/min scores and return them in a dictionary
+    scores_dict = {"mean": mean_scores, "max": max_scores, "min": min_scores}
+    return scores_dict
 
 
 def parse_args() -> Namespace:
@@ -460,7 +488,7 @@ def parse_args() -> Namespace:
         "--mode",
         type=str,
         required=True,
-        help="Allowed inputs: tsne, umap, align_plot",
+        help="Allowed inputs: tsne, umap, align_plot, align_hist_mean_max_min",
     )
     parser.add_argument(
         "--embed_path",
@@ -472,9 +500,19 @@ def parse_args() -> Namespace:
         "--fasta_path", type=Path, required=True, help="Path to access fasta sequences."
     )
     parser.add_argument(
-        "--cluster_path",
+        "--embed_path2",
         type=Path,
-        help="Path to save t-SNE or UMAP plots. Must lead to a directory, not a file.",
+        help="Path to access embeddings for a second set of sequences. Embeddings could be for training, validation, testing, or generated sequences.",
+    )
+    parser.add_argument(
+        "--fasta_path2",
+        type=Path,
+        help="Path to access a second set of fasta sequences.",
+    )
+    parser.add_argument(
+        "--save_dir",
+        type=Path,
+        help="Directory to save plots.",
     )
     parser.add_argument(
         "--get_subplots",
@@ -506,15 +544,10 @@ def parse_args() -> Namespace:
         help="Seed used by the random number generator during embedding initialization and during sampling used by the optimizer to run UMAP.",
     )
     parser.add_argument(
-        "--align_plot_path",
-        type=Path,
-        help="Path to save the Alignment Score vs. Embedding Distance plot. Must be a directory.",
-    )
-    parser.add_argument(
-        "--align_plot_title",
+        "--plot_title",
         default="",
         type=str,
-        help="Title for embed dist vs. align score plot.",
+        help="Title for embed dist vs. align score plot OR for histogram of mean/max/min alignment scores.",
     )
     parser.add_argument(
         "--alignment_type", default="global", type=str, help="global or local"
@@ -549,6 +582,7 @@ def parse_args() -> Namespace:
         type=float,
         help="Extend gap score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
     )
+
     return parser.parse_args()
 
 
@@ -571,15 +605,16 @@ def main() -> None:
     ValueError
         If mode is invalid.
     """
+    if args.save_dir is None:
+        raise ValueError("save_dir is not specified.")
+
     if (args.mode == "tsne") or (args.mode == "umap"):
-        if args.cluster_path is None:
-            raise ValueError("cluster_path is not specified.")
         embed_avg = metrics.get_embed_avg(args.embed_path)
         paint_df = get_paint_df(args.fasta_path, args.embed_path)
         get_cluster(
             embed_data=embed_avg,
             paint_df=paint_df,
-            cluster_path=args.cluster_path,
+            save_dir=args.save_dir,
             tsne_umap=args.mode,
             get_subplots=args.get_subplots,
             umap_n_neighbors=args.umap_n_neighbors,
@@ -587,10 +622,22 @@ def main() -> None:
             umap_spread=args.umap_spread,
             umap_random_state=args.umap_random_state,
         )
-        print(f"Cluster plots have been saved to {args.cluster_path}.")
+        print(f"Cluster plots have been saved to {args.save_dir}.")
     elif args.mode == "align_plot":
-        if args.align_plot_path is None:
-            raise ValueError("align_plot_path is not specified.")
+        """
+        required argparse arguments to pass through:
+        --save_dir
+        --mode
+        --embed_path
+        --fasta_path
+        --alignment_type
+        --plot_title (default="")
+        --num_workers (default=1)
+        --match_score (default=1.0)
+        --mismatch_score (default=0.0)
+        --open_gap_score (default=0.0)
+        --extend_gap_score (default=0.0)
+        """
         embed_avg = metrics.get_embed_avg(args.embed_path)
         dna_seqs = metrics.get_seqs_from_fasta(args.fasta_path)
         embed = np.load(args.embed_path)
@@ -617,12 +664,56 @@ def main() -> None:
         )
         plot_embed_dist_vs_align_score(
             avg_scores_df=avg_scores_df,
-            save_path=args.align_plot_path,
+            save_dir=args.save_dir,
             alignment_type=args.alignment_type,
-            plot_title=args.align_plot_title,
+            plot_title=args.plot_title,
         )
-        print(
-            f"Embed dist vs. align score plot has been saved to {args.align_plot_path}."
+    elif args.mode == "align_hist_mean_max_min":
+        """
+        required argparse arguments to pass through:
+        --save_dir
+        --mode
+        --embed_path
+        --fasta_path
+        --embed_path2
+        --fasta_path2
+        --alignment_type
+        --plot_title (default="")
+        --num_workers (default=1)
+        --match_score (default=1.0)
+        --mismatch_score (default=0.0)
+        --open_gap_score (default=0.0)
+        --extend_gap_score (default=0.0)
+        """
+        # get the protein sequences for the first set of nucleotide sequences
+        dna_seqs1 = metrics.get_seqs_from_fasta(args.fasta_path)
+        embed1 = np.load(args.embed_path)
+        dna_seqs1 = dna_seqs1[: len(embed1)]  # clip DNA sequence to embedding length
+        protein_seqs1 = metrics.dna_to_protein_seqs(dna_seqs1)
+
+        # get the protein sequences for the second set of nucleotide sequences
+        dna_seqs2 = metrics.get_seqs_from_fasta(args.fasta_path2)
+        embed2 = np.load(args.embed_path2)
+        dna_seqs2 = dna_seqs2[: len(embed2)]  # clip DNA sequence to embedding length
+        protein_seqs2 = metrics.dna_to_protein_seqs(dna_seqs2)
+
+        # compute pairwise alignment scores matrix
+        proteins12_align_scores_matrix = metrics.alignment_scores_parallel(
+            seqs1_rec=protein_seqs1,
+            seqs2_rec=protein_seqs2,
+            alignment_type=args.alignment_type,
+            num_workers=args.num_workers,
+            match_score=args.match_score,
+            mismatch_score=args.mismatch_score,
+            open_gap_score=args.open_gap_score,
+            extend_gap_score=args.extend_gap_score,
+        )
+
+        # plot the histogram distributions of mean, max, and min alignment scores
+        plot_align_hist_mean_max_min(
+            proteins12_align_scores_matrix,
+            save_dir=args.save_dir,
+            plot_title=args.plot_title,
         )
     else:
         raise ValueError(f"Invalid mode: {args.mode}")
