@@ -425,11 +425,14 @@ def plot_embed_dist_vs_align_score(
 
 def plot_align_hist_mean_max_min(
     scores_matrix: np.ndarray, save_path: Path = Path(""), plot_title: str = ""
-) -> str:
+) -> None:
+    if not save_path.is_dir():
+        raise ValueError(f"{save_path} is not a directory!")
+
     # compute the mean, max, min alignment score values
-    mean_scores = metrics.get_mean_align_scores(scores_matrix=scores_matrix)
-    max_scores = metrics.get_max_align_scores(scores_matrix=scores_matrix)
-    min_scores = metrics.get_min_align_scores(scores_matrix=scores_matrix)
+    mean_scores = metrics.get_mean_align_scores(scores_matrix)
+    max_scores = metrics.get_max_align_scores(scores_matrix)
+    min_scores = metrics.get_min_align_scores(scores_matrix)
 
     plt.hist(mean_scores, bins=None, alpha=0.5, label="mean")
     plt.hist(max_scores, bins=None, alpha=0.5, label="max")
@@ -439,12 +442,9 @@ def plot_align_hist_mean_max_min(
     plt.title(plot_title)
     plt.legend()
 
-    if save_path.is_dir():
-        plt.savefig(save_path / ("histogram_align_mean_max_min.png"), dpi=300)
-    else:
-        raise ValueError(f"{save_path} is not a directory!")
+    plt.savefig(save_path / "histogram_align_mean_max_min.png", dpi=300)
 
-    return f"Histogram align mean max min plot has been saved to {save_path}."
+    print(f"Histogram align mean max min plot has been saved to {save_path}.")
 
 
 def parse_args() -> Namespace:
