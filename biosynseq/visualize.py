@@ -2,7 +2,7 @@
 import logging
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -85,21 +85,21 @@ def run_umap(
     ----------
     embed_data : np.ndarray
         Sequence embeddings to be transformed by UMAP. Must be 2-dimensional.
-    n_neighbors : int
+    n_neighbors : int, optional
         The size of local neighborhood (in terms of number of neighboring sample points)
         used for manifold approximation. Larger values result in more global views of the
         manifold, while smaller values result in more local data being preserved.
         In general values should be in the range 2 to 100.
-    min_dist : float
+    min_dist : float, optional
         The effective minimum distance between embedded points. Smaller values will result
         in a more clustered/clumped embedding where nearby points on the manifold are drawn
         closer together, while larger values will result on a more even dispersal of points.
         The value should be set relative to the spread value, which determines the scale at
         which embedded points will be spread out.
-    spread : float
+    spread : float, optional
         The effective scale of embedded points. In combination with min_dist this determines
         how clustered/clumped the embedded points are.
-    random_state : int
+    random_state : int, optional
         The seed used by the random number generator during embedding initialization and
         during sampling used by the optimizer.
 
@@ -125,11 +125,10 @@ def plot_cluster(
     data_proj: np.ndarray,
     paint: np.ndarray,
     paint_name: str,
-    save_dir: Path = Path(""),
-    file_name_ending: str = "",
+    save_path: Optional[Path] = None,
     cmap: str = "plasma",
 ) -> pd.DataFrame:
-    """Plot a scatter plot and save it as a png image to the specified directory, save_dir.
+    """Plot a scatter plot and, if save_path is given, save the plots.
 
     Parameters
     ----------
@@ -139,11 +138,9 @@ def plot_cluster(
         Values of each scatter point.
     paint_name : str
         Name of the scatter plot.
-    save_dir : Path
-        Path to save plots, by default Path(""), aka saving the plot to the user's current directory.
-        Must be a directory.
-    file_name_ending : str
-        Ending of the file name to specify the type of plot.
+    save_path : Optional[Path], optional
+        Path to save plots, by default None. If given, should have the format
+        "directory/file_name_to_be_created".
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
@@ -151,15 +148,7 @@ def plot_cluster(
     -------
     pd.DataFrame
         Dataframe with plotting coordinates and plotting values.
-
-    Raises
-    ------
-    ValueError
-        If the given save_dir is not a directory.
     """
-    if not save_dir.is_dir():
-        raise ValueError(f"{save_dir} is not a directory!")
-
     df = pd.DataFrame(
         {
             "z0": data_proj[:, 0],
@@ -171,21 +160,19 @@ def plot_cluster(
     fig = ax.get_figure()
     fig.show()
 
-    # save each plot as a separate png image in the specified directory, save_dir
-    fig.savefig(save_dir / f"{paint_name}_{file_name_ending}.png", dpi=300)
+    if save_path is not None:
+        fig.savefig(save_path, dpi=300)
+        print(f"Your plot has been saved to {save_path}")
     return df
 
 
 def plot_cluster_subplots(
     data_proj: np.ndarray,
     paint_df: pd.DataFrame,
-    save_dir: Path = Path(""),
-    file_name_ending: str = "",
+    save_path: Optional[Path] = None,
     cmap: str = "plasma",
 ) -> Dict[str, pd.DataFrame]:
-    """Plot scatter plots as subplots and save the collective plot in the specified
-    directory, save_dir.
-
+    """Plot scatter plots as subplots and, if save_path is given, save the plot.
     Parameters
     ----------
     data_proj : np.ndarray
@@ -193,11 +180,9 @@ def plot_cluster_subplots(
         each of the subplots.
     paint_df : pd.DataFrame
         Dataframe containing values of each scatter point for each of the subplots.
-    save_dir : Path
-        Path to save plots, by default Path(""), aka saving the plot to the user's current directory.
-        Must be a directory.
-    file_name_ending : str
-        Ending of the file name to specify the type of plot.
+    save_path : Optional[Path], optional
+        Path to save plots, by default None. If given, should have the format
+        "directory/file_name_to_be_created".
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
@@ -205,15 +190,7 @@ def plot_cluster_subplots(
     -------
     Dict[str, pd.DataFrame]
         Dataframes with plotting coordinates and plotting values.
-
-    Raises
-    ------
-    ValueError
-        If the given save_dir is not a directory.
     """
-    if not save_dir.is_dir():
-        raise ValueError(f"{save_dir} is not a directory!")
-
     df_dict = {}
     nrows = 2
     ncols = 2
@@ -240,15 +217,16 @@ def plot_cluster_subplots(
         fig.show()
         plt.tight_layout()
 
-    # save each plot as a collective image with subplots in the specified directory, save_dir
-    fig.savefig(save_dir / f"SeqMetrics_{file_name_ending}.png", dpi=300)
+    if save_path is not None:
+        fig.savefig(save_path, dpi=300)
+        print(f"Your plot has been saved to {save_path}")
     return df_dict
 
 
 def get_cluster(
     embed_data: np.ndarray,
     paint_df: pd.DataFrame,
-    save_dir: Path = Path(""),
+    save_path: Optional[Path] = None,
     tsne_umap: str = "umap",
     get_subplots: bool = False,
     umap_n_neighbors: int = 15,
@@ -265,29 +243,29 @@ def get_cluster(
         Sequence embeddings to be transformed by t-SNE or UMAP. Must be 2-dimensional.
     paint_df : pd.DataFrame
         Dataframe containing information of sequence metrics for each DNA sequence.
-    save_dir : Path
-        Path to save plots, by default Path(""), aka saving the plot to the user's current directory.
-        Must be a directory.
-    tsne_umap : str
+    save_path : Optional[Path], optional
+        Path to save plots, by default None. If given, should have the format
+        "directory/file_name_to_be_created".
+    tsne_umap : str, optional
         "tsne" or "umap" to specify the type of cluster plot, by default "umap."
     get_subplots : bool, optional
         True: save plots as a collective image with subplots;
         False: save plots as separate images.
-    n_neighbors : int
+    n_neighbors : int, optional
         The size of local neighborhood (in terms of number of neighboring sample points)
         used for manifold approximation. Larger values result in more global views of the
         manifold, while smaller values result in more local data being preserved.
         In general values should be in the range 2 to 100.
-    min_dist : float
+    min_dist : float, optional
         The effective minimum distance between embedded points. Smaller values will result
         in a more clustered/clumped embedding where nearby points on the manifold are drawn
         closer together, while larger values will result on a more even dispersal of points.
         The value should be set relative to the spread value, which determines the scale at
         which embedded points will be spread out.
-    spread : float
+    spread : float, optional
         The effective scale of embedded points. In combination with min_dist this determines
         how clustered/clumped the embedded points are.
-    random_state : int
+    random_state : int, optional
         The seed used by the random number generator during embedding initialization and
         during sampling used by the optimizer.
 
@@ -311,23 +289,21 @@ def get_cluster(
         return plot_cluster_subplots(
             data_proj=data_proj,
             paint_df=paint_df,
-            save_dir=save_dir,
-            file_name_ending=tsne_umap,
+            save_path=save_path,
         )
     return {
         str(key): plot_cluster(
             data_proj=data_proj,
             paint=paint_df[key].values,
             paint_name=str(key),
-            save_dir=save_dir,
-            file_name_ending=tsne_umap,
+            save_path=save_path,
         )
         for key in paint_df
     }
 
 
 def plot_metrics_hist(
-    paint_dfs: List[pd.DataFrame], labels: List[str], save_dir: Path = Path("")
+    paint_dfs: List[pd.DataFrame], labels: List[str], save_path: Optional[Path] = None
 ) -> None:
     """Plot the sequence metrics histograms across generated, test, validation, and/or
     training sequences, with each subplot representing a metric, and save the plot to the
@@ -340,17 +316,10 @@ def plot_metrics_hist(
     labels : List[str]
         List of labels containing the names of the type of sequences, in the order that these
         sequence types are arranged in paint_dfs.
-    save_dir : Path
-        Path to save the metrics histograms.
-
-    Raises
-    ------
-    ValueError
-        If the given save_dir is not a directory.
+    save_path : Optional[Path], optional
+        Path to save the metrics histograms, by default None. If given, should have the format
+        "directory/file_name_to_be_created".
     """
-    if not save_dir.is_dir():
-        raise ValueError(f"{save_dir} is not a directory!")
-
     ncols = 2
     nrows = int(np.ceil(len(paint_dfs[0].columns) / 2))
     plt.figure(figsize=(15, 12))  # width, height
@@ -362,14 +331,14 @@ def plot_metrics_hist(
         plt.legend(loc="upper left")
         plt.title(key)
 
-    plt.savefig(save_dir / "metrics_hist.png", dpi=300)
-
-    print(f"Metrics histogram plot has been saved to {save_dir}.")
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300)
+        print(f"Metrics histogram plot has been saved to {save_path}.")
 
 
 def plot_embed_dist_vs_align_score(
     avg_scores_df: pd.DataFrame,
-    save_dir: Path = Path(""),
+    save_path: Optional[Path] = None,
     alignment_type: str = "global",
     plot_title: str = "",
 ) -> None:
@@ -381,22 +350,19 @@ def plot_embed_dist_vs_align_score(
     avg_scores_df : pd.DataFrame
         Three-column dataframe comparing the average L2 distance,
     standard deviation of the L2 distance, and the pairwise alignment scores.
-    save_dir : Path
-        Path to save the Pairwise Alignment Score vs. Embedding L2 Distance plot, by default Path(""),
-        aka saving the plot to the user's current directory. Must be a directory.
+    save_path : Optional[Path], optional
+        Path to save the embedding L2 distance vs. alignment score plot, by default None.
+        If given, should have the format "directory/file_name_to_be_created".
     alignment_type : str, optional
         "global" or "local", by default "global."
+    plot_title : str, optional
+        Title of the plot, by default "".
 
     Raises
     ------
     ValueError
         If alignment_type is neither "global" nor "local."
-    ValueError
-        If the given save_dir is not a directory.
     """
-    if not save_dir.is_dir():
-        raise ValueError(f"{save_dir} is not a directory!")
-
     align_key = metrics._get_alignment_name(alignment_type)
 
     lower_bound = avg_scores_df["avg_embed_dist"] - avg_scores_df["stdev_embed_dist"]
@@ -422,13 +388,15 @@ def plot_embed_dist_vs_align_score(
     plt.yticks(fontsize=14)
     plt.legend()
 
-    plt.savefig(save_dir / "Embed_dist_vs_align_score.png", dpi=300)
-
-    print(f"Embedding distance vs. alignment score plot has been saved to {save_dir}.")
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300)
+        print(
+            f"Embedding distance vs. alignment score plot has been saved to {save_path}."
+        )
 
 
 def plot_align_hist_mean_max_min(
-    scores_matrix: np.ndarray, save_dir: Path = Path(""), plot_title: str = ""
+    scores_matrix: np.ndarray, save_path: Optional[Path] = None, plot_title: str = ""
 ) -> Dict[str, np.ndarray]:
     """Plot a histogram showing the distributions of mean, max, and min alignment scores
     between the alignment of two collections of sequences.
@@ -439,24 +407,17 @@ def plot_align_hist_mean_max_min(
         Alignment scores matrix aligning two collections of sequences seqs1 and seqs2.
         Matrix should have the dimension M * N, where M is the length of seqs1, and N
         is the length of seqs2.
-    save_dir : Path, optional
-        Directory to save the histogram, by default Path("").
+    save_path : Optional[Path], optional
+        Directory to save the plot, by default Path(""). If given, should have the format
+        "directory/file_name_to_be_created".
     plot_title : str, optional
-        Title of the histogram, by default "".
+        Title of the plot, by default "".
 
     Returns
     -------
     Dict[str, np.ndarray]
         Dictionary of mean, max, and min alignment scores
-
-    Raises
-    ------
-    ValueError
-        If the given save_dir is not a directory.
     """
-    if not save_dir.is_dir():
-        raise ValueError(f"{save_dir} is not a directory!")
-
     # compute the mean, max, min alignment score values
     mean_scores = metrics.get_mean_align_scores(scores_matrix)
     max_scores = metrics.get_max_align_scores(scores_matrix)
@@ -470,9 +431,9 @@ def plot_align_hist_mean_max_min(
     plt.title(plot_title)
     plt.legend()
 
-    plt.savefig(save_dir / "histogram_align_mean_max_min.png", dpi=300)
-
-    print(f"Histogram align mean-max-min plot has been saved to {save_dir}.")
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300)
+        print(f"Histogram align mean-max-min plot has been saved to {save_path}.")
 
     # save the mean/max/min scores and return them in a dictionary
     scores_dict = {"mean": mean_scores, "max": max_scores, "min": min_scores}
@@ -514,9 +475,10 @@ def parse_args() -> Namespace:
         help="Path to access a second set of fasta sequences.",
     )
     parser.add_argument(
-        "--save_dir",
+        "--save_path",
         type=Path,
-        help="Directory to save plots.",
+        required=True,
+        help='Path to save plots. Should have the format "directory/file_name_to_be_created".',
     )
     parser.add_argument(
         "--get_subplots",
@@ -551,7 +513,7 @@ def parse_args() -> Namespace:
         "--plot_title",
         default="",
         type=str,
-        help="Title for embed dist vs. align score plot OR for histogram of mean/max/min alignment scores.",
+        help="Title for a plot.",
     )
     parser.add_argument(
         "--alignment_type", default="global", type=str, help="global or local"
@@ -586,7 +548,6 @@ def parse_args() -> Namespace:
         type=float,
         help="Extend gap score to calculate to calculate global or local alignment scores using Align.PairwiseAligner.",
     )
-
     return parser.parse_args()
 
 
@@ -601,24 +562,15 @@ def main() -> None:
     Raises
     ------
     ValueError
-        If user wanted to generate t-SNE or UMAP plots but did not specify the path
-        to save these plots.
-    ValueError
-        If user wanted to generate an embed dist vs. align score plot but did not
-        specify the path to save the plot.
-    ValueError
         If mode is invalid.
     """
-    if args.save_dir is None:
-        raise ValueError("save_dir is not specified.")
-
     if (args.mode == "tsne") or (args.mode == "umap"):
         embed_avg = metrics.get_embed_avg(args.embed_path)
         paint_df = get_paint_df(args.fasta_path, args.embed_path)
         get_cluster(
             embed_data=embed_avg,
             paint_df=paint_df,
-            save_dir=args.save_dir,
+            save_path=args.save_path,
             tsne_umap=args.mode,
             get_subplots=args.get_subplots,
             umap_n_neighbors=args.umap_n_neighbors,
@@ -626,11 +578,11 @@ def main() -> None:
             umap_spread=args.umap_spread,
             umap_random_state=args.umap_random_state,
         )
-        print(f"Cluster plots have been saved to {args.save_dir}.")
+        print(f"Cluster plots have been saved to {args.save_path}.")
     elif args.mode == "align_plot":
         """
         required argparse arguments to pass through:
-        --save_dir
+        --save_path
         --mode
         --embed_path
         --fasta_path
@@ -668,14 +620,14 @@ def main() -> None:
         )
         plot_embed_dist_vs_align_score(
             avg_scores_df=avg_scores_df,
-            save_dir=args.save_dir,
+            save_path=args.save_path,
             alignment_type=args.alignment_type,
             plot_title=args.plot_title,
         )
     elif args.mode == "align_hist_mean_max_min":
         """
         required argparse arguments to pass through:
-        --save_dir
+        --save_path
         --mode
         --embed_path
         --fasta_path
@@ -716,7 +668,7 @@ def main() -> None:
         # plot the histogram distributions of mean, max, and min alignment scores
         plot_align_hist_mean_max_min(
             proteins12_align_scores_matrix,
-            save_dir=args.save_dir,
+            save_path=args.save_path,
             plot_title=args.plot_title,
         )
     else:
