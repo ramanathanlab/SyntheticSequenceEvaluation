@@ -582,7 +582,6 @@ def main() -> None:
             umap_spread=args.umap_spread,
             umap_random_state=args.umap_random_state,
         )
-        print(f"Cluster plots have been saved to {args.save_path}.")
     elif args.mode == "align_plot":
         """
         required argparse arguments to pass through:
@@ -590,7 +589,7 @@ def main() -> None:
         --mode
         --embed_path
         --fasta_path
-        --alignment_type
+        --alignment_type (default="global")
         --plot_title (default="")
         --num_workers (default=1)
         --match_score (default=1.0)
@@ -636,7 +635,7 @@ def main() -> None:
         --fasta_path
         --embed_path2
         --fasta_path2
-        --alignment_type
+        --alignment_type (default="global")
         --plot_title (default="")
         --num_workers (default=1)
         --match_score (default=1.0)
