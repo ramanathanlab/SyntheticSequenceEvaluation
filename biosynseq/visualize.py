@@ -289,12 +289,13 @@ def get_cluster(
         return plot_cluster_subplots(
             data_proj=data_proj, paint_df=paint_df, save_path=save_path,
         )
+    suffix = save_path.suffix
     return {
         str(key): plot_cluster(
             data_proj=data_proj,
             paint=paint_df[key].values,
             paint_name=str(key),
-            save_path=save_path,
+            save_path=save_path.with_suffix(f"-{key}{suffix}"),
         )
         for key in paint_df
     }
