@@ -91,18 +91,17 @@ python3 generate.py --mode get_embeddings --config /homes/lind/MDH-pipeline/mdh_
 # Running visualize.py
 ## Example 1: Get t-SNE plots
 ```
-python3 visualize.py --mode tsne --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --cluster_path /homes/lind/MDH-pipeline/visualize/
+python3 visualize.py --mode tsne --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --save_path /homes/lind/MDH-pipeline/visualize/tsne_gen.png --get_subplots True
 ```
 ## Example 2: Get UMAP plots
 ```
-python3 visualize.py --mode umap --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --cluster_path /homes/lind/MDH-pipeline/visualize/
+python3 visualize.py --mode umap --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --save_path /homes/lind/MDH-pipeline/visualize/umap_gen.png --get_subplots True
 ```
 ## Example 3: Get embedding distance vs. alignment score plots
-Generated sequence:
 ```
-python3 visualize.py --mode align_plot --embed_path /homes/mzvyagin/MDH/perlmutter_data/gpt2_generated_embeddings.npy --fasta_path /homes/mzvyagin/MDH/perlmutter_data/globalstep2850.fasta --align_plot_path /homes/lind/MDH-pipeline/visualize/ --alignment_type global --num_workers 70
+python3 visualize.py --mode align_plot --embed_path /homes/mzvyagin/MDH/perlmutter_data/inference-test-embeddings.npy --fasta_path /homes/mzvyagin/MDH/gene_transformer/gene_transformer/data/full_mdh_fasta/test.fasta --save_path /homes/lind/MDH-pipeline/visualize/embed_dist_vs_align_score_test.png --alignment_type global --num_workers 70
 ```
-Test sequence: 
+## Example 4: Getting histogram showing mean/max/min alignment scores between two collections of sequences
 ```
-python3 visualize.py --mode align_plot --embed_path /homes/mzvyagin/MDH/perlmutter_data/inference-test-embeddings.npy --fasta_path /homes/mzvyagin/MDH/gene_transformer/gene_transformer/data/full_mdh_fasta/test.fasta --align_plot_path /homes/lind/MDH-pipeline/visualize/ --alignment_type global --num_workers 70
+python3 visualize.py --mode align_hist_mean_max_min --embed_path /homes/mzvyagin/mdh_gpt2/likely-wood-857/likely-wood-857-1024concat_seqs_fasta_embeddings_mean.npy --fasta_path /homes/mzvyagin/mdh_gpt2/likely-wood-857/likely-wood-857_1024concat_seqs.fasta --embed_path2 /homes/mzvyagin/mdh_gpt2/likely-wood-857/likely-wood-857-test_fasta_embeddings_mean.npy --fasta_path2 /homes/mzvyagin/MDH/gene_transformer/gene_transformer/data/full_mdh_fasta/test.fasta --save_path /homes/lind/MDH-pipeline/visualize/gen_test_hist_mean_max_min.png --alignment_type global --num_workers 70
 ```
