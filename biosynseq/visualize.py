@@ -162,6 +162,13 @@ def plot_cluster(
     fig.show()
 
     if save_path is not None:
+        # get the file name and the suffix of save_path separately
+        split_tup = os.path.splitext(save_path)
+        file_name = split_tup[0]
+        suffix = split_tup[1]
+        # add paint_name to the file name
+        save_path = str(file_name) + "-" + str(paint_name) + str(suffix)
+
         fig.savefig(save_path, dpi=300)
         print(f"Your plot has been saved to {save_path}")
     return df
@@ -291,24 +298,15 @@ def get_cluster(
             data_proj=data_proj, paint_df=paint_df, save_path=save_path,
         )
 
-    # suffix = save_path.suffix
-    # get the file name and the suffix of save_path separately
-    split_tup = os.path.splitext(save_path)
-    file_name = split_tup[0]
-    suffix = split_tup[1]
     return {
         str(key): plot_cluster(
             data_proj=data_proj,
             paint=paint_df[key].values,
             paint_name=str(key),
-            save_path=str(file_name) + f"-{key}" + str(suffix),
+            save_path=save_path,
         )
         for key in paint_df
     }
-    #         save_path=save_path.with_suffix(f"-{key}{suffix}"),
-    #     )
-    #     for key in paint_df
-    # }
 
 
 def plot_metrics_hist(
