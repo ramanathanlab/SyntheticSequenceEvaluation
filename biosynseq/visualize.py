@@ -1,5 +1,6 @@
 """Visualize synthetic sequences using t-SNE, UMAP, and other visualization schemes."""
 import logging
+import os
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -140,7 +141,7 @@ def plot_cluster(
         Name of the scatter plot.
     save_path : Optional[Path], optional
         Path to save plots, by default None. If given, should have the format
-        "directory/file_name_to_be_created".
+        "directory/file_name_to_be_created.png".
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
@@ -182,7 +183,7 @@ def plot_cluster_subplots(
         Dataframe containing values of each scatter point for each of the subplots.
     save_path : Optional[Path], optional
         Path to save plots, by default None. If given, should have the format
-        "directory/file_name_to_be_created".
+        "directory/file_name_to_be_created.png".
     cmap : str, optional
         Colormap to visualize, by default "plasma."
 
@@ -245,7 +246,7 @@ def get_cluster(
         Dataframe containing information of sequence metrics for each DNA sequence.
     save_path : Optional[Path], optional
         Path to save plots, by default None. If given, should have the format
-        "directory/file_name_to_be_created".
+        "directory/file_name_to_be_created.png".
     tsne_umap : str, optional
         "tsne" or "umap" to specify the type of cluster plot, by default "umap."
     get_subplots : bool, optional
@@ -289,16 +290,25 @@ def get_cluster(
         return plot_cluster_subplots(
             data_proj=data_proj, paint_df=paint_df, save_path=save_path,
         )
-    suffix = save_path.suffix
+
+    # suffix = save_path.suffix
+    # get the file name and the suffix of save_path separately
+    split_tup = os.path.splitext(save_path)
+    file_name = split_tup[0]
+    suffix = split_tup[1]
     return {
         str(key): plot_cluster(
             data_proj=data_proj,
             paint=paint_df[key].values,
             paint_name=str(key),
-            save_path=save_path.with_suffix(f"-{key}{suffix}"),
+            save_path=str(file_name) + f"-{key}" + str(suffix),
         )
         for key in paint_df
     }
+    #         save_path=save_path.with_suffix(f"-{key}{suffix}"),
+    #     )
+    #     for key in paint_df
+    # }
 
 
 def plot_metrics_hist(
@@ -317,7 +327,7 @@ def plot_metrics_hist(
         sequence types are arranged in paint_dfs.
     save_path : Optional[Path], optional
         Path to save the metrics histograms, by default None. If given, should have the format
-        "directory/file_name_to_be_created".
+        "directory/file_name_to_be_created.png".
     """
     ncols = 2
     nrows = int(np.ceil(len(paint_dfs[0].columns) / 2))
@@ -351,7 +361,7 @@ def plot_embed_dist_vs_align_score(
     standard deviation of the L2 distance, and the pairwise alignment scores.
     save_path : Optional[Path], optional
         Path to save the embedding L2 distance vs. alignment score plot, by default None.
-        If given, should have the format "directory/file_name_to_be_created".
+        If given, should have the format "directory/file_name_to_be_created.png".
     alignment_type : str, optional
         "global" or "local", by default "global."
     plot_title : str, optional
@@ -408,7 +418,7 @@ def plot_align_hist_mean_max_min(
         is the length of seqs2.
     save_path : Optional[Path], optional
         Directory to save the plot, by default Path(""). If given, should have the format
-        "directory/file_name_to_be_created".
+        "directory/file_name_to_be_created.png".
     plot_title : str, optional
         Title of the plot, by default "".
 
@@ -477,7 +487,7 @@ def parse_args() -> Namespace:
         "--save_path",
         type=Path,
         required=True,
-        help='Path to save plots. Should have the format "directory/file_name_to_be_created".',
+        help='Path to save plots. Should have the format "directory/file_name_to_be_created.png".',
     )
     parser.add_argument(
         "--get_subplots",
