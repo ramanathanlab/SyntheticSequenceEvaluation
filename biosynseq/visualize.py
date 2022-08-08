@@ -162,7 +162,7 @@ def plot_cluster(
     fig.show()
 
     if save_path is not None:
-        fig.savefig(str(save_path) + "_" + paint_name, dpi=300)
+        fig.savefig(save_path, dpi=300)
         print(f"Your plot has been saved to {save_path}")
     return df
 
