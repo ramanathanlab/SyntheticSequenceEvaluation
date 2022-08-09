@@ -9,12 +9,12 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 from gene_transformer.config import ModelSettings
-from gene_transformer.model import (
+from gene_transformer.utils import (
     LoadDeepSpeedStrategy,
     LoadPTCheckpointStrategy,
     ModelLoadStrategy,
-    inference,
 )
+from gene_transformer.model import DNATransformer, inference
 from gene_transformer.utils import non_redundant_generation, seqs_to_fasta
 
 logger = logging.getLogger("biosynseq.generate")
@@ -40,14 +40,12 @@ def generate_fasta(
     Dict[str, List[str]]
         Unique generated sequences.
     """
-    # obtain model
-    model = model_strategy.get_model()
-    model.cuda()
-    # generate non-redundant sequences
+    # Obtain model
+    model = model_strategy.get_model(DNATransformer).cuda()
+    # Generate non-redundant sequences
     results = non_redundant_generation(
         model=model.model, tokenizer=model.tokenizer, num_seqs=num_seqs
     )
-    results["unique_seqs"] = list(results["unique_seqs"])
     # turn unique sequences to fasta
     seqs_to_fasta(seqs=results["unique_seqs"], file_name=fasta_path)
     return results
@@ -100,7 +98,13 @@ def parse_args() -> Namespace:
         help="get_fasta or get_embeddings",
     )
     parser.add_argument(
-        "--pt_path", type=str, required=True, help="Path to access pt file"
+        "--load_pt_checkpoint", type=Path, default=None, help="Path to access pt file"
+    )
+    parser.add_argument(
+        "--load_ds_checkpoint",
+        type=Path,
+        default=None,
+        help="Path to access deepspeed checkpoint directory",
     )
     parser.add_argument(
         "--fasta_path",
@@ -140,7 +144,7 @@ def main() -> None:
     Raises
     ------
     ValueError
-        If embeddings_model_load is not either "pt" or "deepspeed."
+        Either load_pt_checkpoint or load_ds_checkpoint must be set.
     ValueError
         If fasta_path is not provided to generate embeddings.
     FileExistsError
@@ -155,18 +159,17 @@ def main() -> None:
     torch.set_num_threads(config.num_data_workers)  # pylint: disable=no-member
     pl.seed_everything(0)
 
-    # get model_strategy
-    if args.embeddings_model_load == "pt":
-        model_strategy = LoadPTCheckpointStrategy(config, args.pt_path)
-    elif args.inference_model_load == "deepspeed":
-        model_strategy = LoadDeepSpeedStrategy(config)
+    if args.load_pt_checkpoint is not None:
+        load_strategy = LoadPTCheckpointStrategy(args.load_pt_checkpoint, cfg=config)
+    elif args.load_ds_checkpoint is not None:
+        load_strategy = LoadDeepSpeedStrategy(args.load_ds_checkpoint, cfg=config)
     else:
-        raise ValueError(f"Invalid embeddings_model_load {args.embeddings_model_load}")
+        raise ValueError("Either load_pt_checkpoint or load_ds_checkpoint must be set.")
 
     # run corresponding function
     if args.mode == "get_fasta":
         generate_fasta(
-            model_strategy=model_strategy,
+            model_strategy=load_strategy,
             fasta_path=args.fasta_path,
             num_seqs=args.num_seqs,
         )
@@ -178,7 +181,7 @@ def main() -> None:
                 f"embeddings_output_path: {args.embeddings_output_path} already exists!"
             )
         fasta_to_embeddings(
-            model_strategy=model_strategy,
+            model_strategy=load_strategy,
             fasta_path=args.fasta_path,
             embeddings_output_path=args.embeddings_output_path,
         )
