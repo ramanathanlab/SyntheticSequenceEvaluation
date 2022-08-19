@@ -1,0 +1,6 @@
+# To ignore line counts
+*.ipynb linguist-generated
+*.tree linguist-generated
+*.tree linguist-generated
+*.aln linguist-generated
+*.xlsx linguist-generated
