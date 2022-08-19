@@ -619,7 +619,7 @@ def main() -> None:
         )
         avg_scores_df = metrics.get_avg_scores_df(
             scores_df=scores_df, alignment_type=args.alignment_type,
-        )
+n        )
         plot_embed_dist_vs_align_score(
             avg_scores_df=avg_scores_df,
             save_path=args.save_path,
