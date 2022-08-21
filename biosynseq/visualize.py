@@ -295,7 +295,9 @@ def get_cluster(
 
     if get_subplots:
         return plot_cluster_subplots(
-            data_proj=data_proj, paint_df=paint_df, save_path=save_path,
+            data_proj=data_proj,
+            paint_df=paint_df,
+            save_path=save_path,
         )
 
     return {
@@ -517,7 +519,10 @@ def parse_args() -> Namespace:
         help="Seed used by the random number generator during embedding initialization and during sampling used by the optimizer to run UMAP.",
     )
     parser.add_argument(
-        "--plot_title", default="", type=str, help="Title for a plot.",
+        "--plot_title",
+        default="",
+        type=str,
+        help="Title for a plot.",
     )
     parser.add_argument(
         "--alignment_type", default="global", type=str, help="global or local"
@@ -618,8 +623,9 @@ def main() -> None:
             alignment_type=args.alignment_type,
         )
         avg_scores_df = metrics.get_avg_scores_df(
-            scores_df=scores_df, alignment_type=args.alignment_type,
-n        )
+            scores_df=scores_df,
+            alignment_type=args.alignment_type,
+        )
         plot_embed_dist_vs_align_score(
             avg_scores_df=avg_scores_df,
             save_path=args.save_path,

@@ -9,13 +9,14 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 from gene_transformer.config import ModelSettings
+from gene_transformer.model import DNATransformer, inference
 from gene_transformer.utils import (
     LoadDeepSpeedStrategy,
     LoadPTCheckpointStrategy,
     ModelLoadStrategy,
+    non_redundant_generation,
+    seqs_to_fasta,
 )
-from gene_transformer.model import DNATransformer, inference
-from gene_transformer.utils import non_redundant_generation, seqs_to_fasta
 
 logger = logging.getLogger("biosynseq.generate")
 
